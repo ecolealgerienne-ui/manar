@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS product_views (id INTEGER PRIMARY KEY, product_id INT
 CREATE TABLE IF NOT EXISTS audit_log (id INTEGER PRIMARY KEY, admin_id INTEGER, admin_email TEXT, action TEXT, entity TEXT, entity_id TEXT, detail TEXT, at TEXT);
 CREATE TABLE IF NOT EXISTS reports (id INTEGER PRIMARY KEY, user_id INTEGER, product_id INTEGER, offer_id INTEGER, message TEXT, status TEXT DEFAULT 'open', created_at TEXT);
 CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY, name TEXT, email TEXT, subject TEXT, body TEXT, created_at TEXT);
+CREATE TABLE IF NOT EXISTS newsletter (id INTEGER PRIMARY KEY, email TEXT UNIQUE NOT NULL, created_at TEXT);
 CREATE TABLE IF NOT EXISTS matches (
   id INTEGER PRIMARY KEY, merchant_id INTEGER, feed_title TEXT, feed_brand TEXT, feed_size TEXT, feed_ean TEXT, product_id INTEGER, format_id INTEGER,
   confidence REAL, reason TEXT, status TEXT DEFAULT 'pending', created_at TEXT

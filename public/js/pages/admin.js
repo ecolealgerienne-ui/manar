@@ -186,8 +186,9 @@ async function journal(box) {
   box.innerHTML = html`<h1>Journal des modifications</h1>${entries.length ? html`<div class="table-wrap"><table class="t"><thead><tr><th>Date</th><th>Administrateur</th><th>Action</th><th>Objet</th><th>Détail</th></tr></thead><tbody>${entries.map((e) => html`<tr><td>${dateTimeFr(e.at)}</td><td>${e.admin_email}</td><td>${e.action}</td><td>${e.entity} ${e.entity_id}</td><td class="small muted">${e.detail}</td></tr>`)}</tbody></table></div>` : empty('Journal vide', 'Les modifications administratives apparaîtront ici.')}`.s;
 }
 async function messages(box) {
-  const [{ messages }, { emails }] = await Promise.all([api('/api/admin/messages'), api('/api/admin/outbox')]);
+  const [{ messages }, { emails }, { subscribers }] = await Promise.all([api('/api/admin/messages'), api('/api/admin/outbox'), api('/api/admin/newsletter')]);
   box.innerHTML = html`<h1>Messages</h1>${messages.length ? messages.map((m) => html`<div class="card" style="padding:1rem;margin-bottom:.6rem"><strong>${m.subject || '(sans sujet)'}</strong> <span class="small muted">— ${m.name} &lt;${m.email}&gt; · ${dateTimeFr(m.created_at)}</span><p style="margin:.4rem 0 0">${m.body}</p></div>`) : html`<p class="muted">Aucun message.</p>`}
+    <h2 style="margin-top:2rem">Inscrits à la newsletter (${subscribers.length})</h2>${subscribers.length ? html`<p class="small">${subscribers.map((x) => x.email).join(', ')}</p>` : html`<p class="muted">Aucun inscrit.</p>`}
     <h2 style="margin-top:2rem">Boîte d’envoi des emails d’alerte</h2><p class="small muted">Aucun serveur SMTP n’est connecté : les emails sont consignés ici et <strong>non envoyés</strong>.</p>${emails.length ? html`<div class="table-wrap"><table class="t"><thead><tr><th>Date</th><th>Destinataire</th><th>Sujet</th><th>Statut</th></tr></thead><tbody>${emails.map((e) => html`<tr><td>${dateTimeFr(e.created_at)}</td><td>${e.to_email}</td><td>${e.subject}</td><td><span class="tag warn">${e.status}</span></td></tr>`)}</tbody></table></div>` : html`<p class="muted">Aucun email.</p>`}`.s;
 }
 void spinner; void navigate;

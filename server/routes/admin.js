@@ -270,6 +270,7 @@ export function registerAdmin(r, { db, cat, nowIso }) {
   r.get('/api/admin/reports', A(() => ({ reports: db.prepare('SELECT * FROM reports ORDER BY id DESC LIMIT 200').all() })));
   r.put('/api/admin/reports/:id', A((ctx) => { db.prepare('UPDATE reports SET status=? WHERE id=?').run(ctx.body.status === 'open' ? 'open' : 'resolved', +ctx.params.id); audit(ctx, 'report-status', 'report', ctx.params.id, ctx.body); return { ok: true }; }));
   r.get('/api/admin/messages', A(() => ({ messages: db.prepare('SELECT * FROM messages ORDER BY id DESC LIMIT 200').all() })));
+  r.get('/api/admin/newsletter', A(() => ({ subscribers: db.prepare('SELECT email,created_at FROM newsletter ORDER BY id DESC LIMIT 500').all() })));
   r.get('/api/admin/outbox', A(() => ({ emails: db.prepare('SELECT * FROM email_outbox ORDER BY id DESC LIMIT 100').all() })));
 
   // ---- Rapprochement produits

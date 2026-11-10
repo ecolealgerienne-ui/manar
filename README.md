@@ -20,4 +20,4 @@ Au premier démarrage, les identifiants de démonstration sont affichés (et éc
 - [Utilisateur](docs/utilisateur.md) · [Administrateur](docs/administrateur.md) · [Technique](docs/technique.md) · [Déploiement](docs/deploiement.md) · [Fonctionnalités et intégrations restantes](docs/etat-des-lieux.md)
 
 ## Identité
-Nom : **Manou**. Couleurs principales : Pantone 18-1553 TCX *Adrenaline Rush* (`--gold-d`, ≈ #CC3F28, légèrement assombri pour la lisibilité du texte blanc) et Pantone 14-4714 TCX *Clear Tides* (`--gold`, ≈ #9ED3DB). Les valeurs hex sont des équivalents écran approximatifs, modifiables en tête de `public/css/style.css`.
+Nom : **Manou**. Direction artistique v3 (maison de beauté) : ivoire et blanc dominants, rouge Adrenaline Rush `#C83D42` en signature, bleu Clear Tides `#A9D5D8` en touches (Beauty Match, filtres sélectionnés, notes), charbon `#292725`. Polices DM Sans + Cormorant Garamond, embarquées en local (`public/fonts`, licence OFL). Les hex sont des approximations à ajuster dans les variables `:root` de `public/css/style.css`. Les visuels produits sont des illustrations générées : remplacez-les par une vraie photographie sous licence.

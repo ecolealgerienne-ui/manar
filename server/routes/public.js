@@ -53,7 +53,17 @@ export function registerPublic(r, { db, cat, nowIso }) {
     const popularBrands = cat.brands.map((b) => ({ slug: b.slug, name: b.name, count: brandCount[b.slug] || 0, fictional: !!b.fictional })).filter((b) => !b.fictional).sort((a, b) => b.count - a.count).slice(0, 12);
     const catCounts = {};
     for (const p of cat.products) catCounts[p.category] = (catCounts[p.category] || 0) + 1;
-    return { bestOffers, bestPromotions, families, popularNotes, trending, newcomers, popularBrands, catCounts, lastUpdate: usable.map((p) => p.summary.lastFetched).filter(Boolean).sort().pop() };
+    // Mises en scène éditoriales : visuels de catégories, exemple Beauty Match et comparateur
+    const tiles = {};
+    for (const c of ['parfum', 'skincare', 'maquillage', 'cheveux', 'corps']) { const top = usable.filter((p) => p.category === c).sort((a, b) => b.popularity - a.popularity)[0]; if (top) tiles[c] = top.slug; }
+    let beautyMatch = null;
+    for (const ref of [...perfumes].sort((a, b) => b.popularity - a.popularity).slice(0, 25)) {
+      const items = findSimilar(cat, ref, { cheaper: true, limit: 3, minScore: 45 });
+      if (items.length >= 2) { beautyMatch = { ref: cat.card(ref), items }; break; }
+    }
+    const cmpP = trending[0] ? cat.productById.get(trending[0].id) : null;
+    const compare = cmpP ? (() => { const f = cmpP.formats.find((x) => x.offers.some((o) => o.usable)) || cmpP.formats[0]; return { product: cat.card(cmpP), format: f.label, offers: f.offers.filter((o) => o.usable).slice(0, 4).map((o) => ({ id: o.id, merchant: o.merchant.name, type: o.merchant.type, price: o.price, per100: o.per100, shipping: o.shipping, total: o.total, fetchedAt: o.fetchedAt })) }; })() : null;
+    return { tiles, beautyMatch, compare, bestOffers, bestPromotions, families, popularNotes, trending, newcomers, popularBrands, catCounts, lastUpdate: usable.map((p) => p.summary.lastFetched).filter(Boolean).sort().pop() };
   });
 
   // -------- Produit
@@ -245,6 +255,13 @@ export function registerPublic(r, { db, cat, nowIso }) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email || '')) throw bad('Adresse email invalide.');
     if (!body || String(body).length < 10 || String(body).length > 3000) throw bad('Message de 10 à 3000 caractères requis.');
     db.prepare('INSERT INTO messages (name,email,subject,body,created_at) VALUES (?,?,?,?,?)').run(String(name).slice(0, 100), email, String(subject || '').slice(0, 150), String(body), nowIso());
+    return { ok: true };
+  }, { limit: 'contact' });
+  r.post('/api/newsletter', (ctx) => {
+    const email = String(ctx.body.email || '').trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 254) throw bad('Adresse email invalide.', { field: 'email' });
+    if (ctx.body.consent !== true) throw bad('Veuillez accepter de recevoir la newsletter.', { field: 'consent' });
+    db.prepare('INSERT OR IGNORE INTO newsletter (email,created_at) VALUES (?,?)').run(email, nowIso());
     return { ok: true };
   }, { limit: 'contact' });
   r.post('/api/reports', (ctx) => {

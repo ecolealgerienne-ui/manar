@@ -15,7 +15,7 @@ function offersTable(f, sort, onlyVerified) {
   const bestTotal = Math.min(...usable.map((o) => o.total));
   const row = (o, i) => html`<tr class="${o.usable ? (o.total === bestTotal ? 'best' : '') : 'off'}">
     <td data-l="Marchand"><div class="row" style="flex-wrap:nowrap;gap:.6rem"><span class="sw" style="background:var(--beige);display:grid;place-items:center;font:600 .7rem var(--sans);flex:none" aria-hidden="true">${o.merchant.name[0]}</span>
-      <div><strong>${o.merchant.name.replace(' (démo)', '')}</strong> ${demoTag}<br><span class="tag ${o.merchant.verified ? 'ok' : 'warn'}" title="${o.merchant.criteria || ''}">${MERCHANT_TYPES[o.merchant.type]}</span>
+      <div><strong>${o.merchant.name.replace(' (démo)', '')}</strong> ${o.usable && o.total === bestTotal ? html`<span class="best-badge">Meilleure offre</span>` : ''} ${demoTag}<br><span class="tag ${o.merchant.verified ? 'ok' : 'warn'}" title="${o.merchant.criteria || ''}">${MERCHANT_TYPES[o.merchant.type]}</span>
       <details class="small muted"><summary>Critères de vérification</summary>${o.merchant.criteria || 'Aucun critère renseigné.'}<br>Dernier contrôle du marchand : ${dateFr(o.merchant.lastCheck)}. L’authenticité du produit n’est pas garantie.</details></div></div></td>
     <td data-l="Prix initial">${o.priceOrig ? html`<s class="muted">${eur(o.priceOrig)}</s><div class="small muted">réf. annoncée</div>` : '—'}</td>
     <td data-l="Prix actuel"><strong>${eur(o.price)}</strong></td>
@@ -117,13 +117,13 @@ export default async function product(ctx) {
   return {
     title: `${p.brand} ${p.name}${p.concentration ? ' ' + CONC[p.concentration] : ''} — comparer les prix | MANOU`, desc: p.description?.slice(0, 160),
     html: html`<div class="container">${head(d)}
-      <div class="pdp"><div class="pdp-img"><img src="${p.image}" alt="Illustration de démonstration : ${p.brand} ${p.name}" width="360" height="320"></div>
+      <div class="pdp"><div class="pdp-img"><img src="${p.image}" alt="Illustration de démonstration : ${p.brand} ${p.name}" width="320" height="400"></div>
       <div>
         <a class="eyebrow" href="/marques/${p.brandSlug}" style="text-decoration:none">${p.brand}</a>
         <h1 style="font-size:clamp(2rem,4vw,3rem)">${p.name}</h1>
         <div class="row" style="margin-bottom:.8rem">${p.demo ? html`<span class="tag demo">Fiche de démonstration</span>` : ''}${p.verified ? html`<span class="tag ok">Fiche vérifiée</span>` : html`<span class="tag warn">Données non vérifiées</span>`}${p.concentration ? html`<span class="tag">${CONC[p.concentration]}</span>` : ''}${p.gender && p.category === 'parfum' ? html`<span class="tag">${GENDER[p.gender]}</span>` : ''}${d.rating ? html`${stars(d.rating)} <span class="small muted">${d.rating}/5 · ${d.reviews.length} avis</span>` : ''}</div>
         <p>${p.description}</p>
-        ${d.summary.minPrice != null ? html`<div class="price" style="display:flex;gap:.7rem;align-items:baseline;flex-wrap:wrap"><span class="muted">À partir de</span><b style="font-size:2rem;font-family:var(--serif)">${eur(d.summary.minPrice)}</b>${d.summary.priceOrig ? html`<s class="muted">${eur(d.summary.priceOrig)}</s>` : ''}<span class="muted small">${d.summary.minFormat} · ${d.summary.merchantsCount} marchand${d.summary.merchantsCount > 1 ? 's' : ''}</span></div>${d.deal?.enough && d.deal.label ? html`<span class="tag ok">${d.deal.label}</span>` : ''}` : html`<div class="notice">Aucune offre active pour ce produit actuellement.</div>`}
+        ${d.summary.minPrice != null ? html`<div class="price" style="display:flex;gap:.7rem;align-items:baseline;flex-wrap:wrap"><span class="muted">À partir de</span><b class="pdp-price">${eur(d.summary.minPrice)}</b>${d.summary.priceOrig ? html`<s class="muted">${eur(d.summary.priceOrig)}</s>` : ''}<span class="muted small">${d.summary.minFormat} · ${d.summary.merchantsCount} marchand${d.summary.merchantsCount > 1 ? 's' : ''}</span></div>${d.deal?.enough && d.deal.label ? html`<span class="tag ok">${d.deal.label}</span>` : ''}` : html`<div class="notice">Aucune offre active pour ce produit actuellement.</div>`}
         <div class="row" style="margin:1rem 0">
           <button class="btn" data-fav="${p.id}" aria-pressed="${fav}" id="favbtn">${ICONS.heart} <span>${fav ? 'Dans vos favoris' : 'Ajouter aux favoris'}</span></button>
           <button class="btn btn-gold" id="alertbtn">${ICONS.bell} Alerte de prix</button>
@@ -140,7 +140,7 @@ export default async function product(ctx) {
       <section id="historique" style="margin-top:3rem"><h2>Historique des prix</h2>
         <div class="row"><div class="chips" id="periods">${[[7, '7 jours'], [30, '30 jours'], [90, '3 mois'], [180, '6 mois'], [365, '1 an']].map(([v, l]) => html`<button class="chip" data-period="${v}" aria-pressed="${v === st.period}">${l}</button>`)}</div></div>
         <div id="hist-body" aria-live="polite"></div></section>
-      <section id="similaires" style="margin-top:3rem"><div class="sec-head"><h2 style="margin:0">Vous pourriez également aimer</h2><a class="btn btn-sm" href="/produit/${p.slug}/similaires">Voir toutes les alternatives</a></div>
+      <section id="similaires" style="margin-top:3rem"><div class="sec-head"><div class="bm-head"><span class="bm-badge">Beauty Match</span><h2 style="margin:0">Vous pourriez également aimer</h2></div><a class="btn btn-sm" href="/produit/${p.slug}/similaires">Voir toutes les alternatives</a></div>
         ${d.cheaper.length ? html`<h3>Alternatives moins chères</h3>${simList(d.cheaper.slice(0, 3))}` : ''}
         <h3 style="margin-top:1.5rem">Produits similaires</h3>${simList(d.similar.slice(0, 6), false)}</section>
       <section id="avis" style="margin-top:3rem"><h2>Avis</h2>

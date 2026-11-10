@@ -51,7 +51,7 @@ async function init(root) {
   aq.addEventListener('input', debounce(async () => {
     if (aq.value.trim().length < 2) { sug.hidden = true; return; }
     const d = await api('/api/suggest', { query: { q: aq.value } });
-    sug.innerHTML = d.products.length ? d.products.map((p) => `<button type="button" data-id="${p.id}"><img src="${p.image}" alt="" width="34" height="30"><span><b>${p.name}</b><br><small class="muted">${p.brand}</small></span></button>`).join('') : '<p class="small muted" style="padding:.8rem">Aucun produit.</p>';
+    sug.innerHTML = d.products.length ? d.products.map((p) => `<button type="button" data-id="${p.id}"><img src="${p.image}" alt="" width="34" height="42"><span><b>${p.name}</b><br><small class="muted">${p.brand}</small></span></button>`).join('') : '<p class="small muted" style="padding:.8rem">Aucun produit.</p>';
     sug.hidden = false;
   }, 200));
   sug.addEventListener('click', async (e) => {

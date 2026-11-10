@@ -118,7 +118,7 @@ export function productCard(p, { showMatch = false } = {}) {
   return html`<article class="card">
     ${p.maxDiscount > 0 || p.discount > 0 ? html`<span class="tag gold disc">−${p.discount || p.maxDiscount} %</span>` : ''}
     <button class="icon-btn fav" data-fav="${p.id}" aria-pressed="${fav}" aria-label="${fav ? 'Retirer des favoris' : 'Ajouter aux favoris'} : ${p.name}">${ICONS.heart}</button>
-    <a class="img" href="/produit/${p.slug}" tabindex="-1" aria-hidden="true"><img src="${p.image}" alt="" loading="lazy" width="360" height="320"></a>
+    <a class="img" href="/produit/${p.slug}" tabindex="-1" aria-hidden="true"><img src="${p.image}" alt="" loading="lazy" width="320" height="400"></a>
     <div class="body">
       <a class="brand" href="/marques/${p.brandSlug}">${p.brand}</a>
       <a class="name" href="/produit/${p.slug}">${p.name}</a>
@@ -177,7 +177,7 @@ export function attachSearch(root, { onNavigate } = {}) {
   const render = (d) => {
     const items = [];
     const sec = (title, arr, fn) => arr.length ? html`<h4>${title}</h4>${arr.map(fn)}` : '';
-    const out = html`${sec('Produits', d.products, (p) => html`<a href="/produit/${p.slug}"><img src="${p.image}" alt="" width="34" height="30"><span><b>${p.name}</b><br><small class="muted">${p.brand}${p.minPrice ? ' · dès ' + eur(p.minPrice) : ''}</small></span></a>`)}
+    const out = html`${sec('Produits', d.products, (p) => html`<a href="/produit/${p.slug}"><img src="${p.image}" alt="" width="34" height="42"><span><b>${p.name}</b><br><small class="muted">${p.brand}${p.minPrice ? ' · dès ' + eur(p.minPrice) : ''}</small></span></a>`)}
       ${sec('Marques', d.brands, (b) => html`<a href="/marques/${b.slug}">${b.name}</a>`)}
       ${sec('Catégories', d.categories, (c) => html`<a href="/${c.slug}">${c.name}</a>`)}
       ${sec('Notes', d.notes, (n) => html`<button type="button" data-q="${n}">${n}</button>`)}

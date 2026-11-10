@@ -1,38 +1,39 @@
 import { html, api, state, emit, onState, loadFavs, toggleFav, ICONS, attachSearch, searchBox, toast, ls, basket, esc } from './lib.js';
 import { render, navigate, setHooks } from './router.js';
 
-const NAV = [['/parfums', 'Parfums'], ['/skincare', 'Skincare'], ['/maquillage', 'Maquillage'], ['/cheveux-corps', 'Cheveux & Corps'], ['/promotions', 'Promotions'], ['/marques', 'Marques']];
+const NAV = [['/parfums', 'Parfums'], ['/skincare', 'Skincare'], ['/maquillage', 'Makeup'], ['/cheveux-corps', 'Cheveux & corps'], ['/promotions', 'Promotions'], ['/marques', 'Marques']];
 
 function header() {
   const p = location.pathname;
   const cur = (h) => (p === h || p.startsWith(h + '/') ? 'aria-current="page"' : '');
   const el = document.getElementById('site-header');
+  const open = el.querySelector('#sp') && !el.querySelector('#sp').hidden;
   el.innerHTML = html`<div class="container"><div class="hdr">
-    <button class="icon-btn burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="drawer">${ICONS.menu}</button>
-    <a class="logo" href="/" aria-label="MANOU — accueil">manou<span>.</span></a>
-    <div class="hdr-search" id="hs">${searchBox('', 'Rechercher un parfum, une marque, un ingrédient…')}</div>
+    <div class="row" style="flex-wrap:nowrap;gap:.3rem"><button class="icon-btn burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="drawer">${ICONS.menu}</button>
+    <a class="brand" href="/" aria-label="MANOU — accueil"><span class="logo">MANOU<span>.</span></span><span class="tagline">BEAUTY DISCOVERY</span></a></div>
     <nav class="nav" aria-label="Navigation principale">${NAV.map(([h, l]) => html`<a href="${h}" ${raw(cur(h))}>${l}</a>`)}</nav>
     <div class="hdr-actions">
+      <button class="icon-btn" id="sbtn" aria-label="Rechercher" aria-expanded="${!!open}" aria-controls="sp">${ICONS.search}</button>
       <a class="icon-btn" href="/favoris" aria-label="Favoris (${state.favIds.size})">${ICONS.heart}${state.favIds.size ? html`<span class="badge">${state.favIds.size}</span>` : ''}</a>
       <a class="icon-btn" href="/comparateur-panier" aria-label="Comparateur de panier (${state.basketCount} article${state.basketCount > 1 ? 's' : ''})">${ICONS.bag}${state.basketCount ? html`<span class="badge">${state.basketCount}</span>` : ''}</a>
-      ${state.user ? html`<a class="icon-btn" href="/notifications" aria-label="Notifications (${state.unread} non lues)">${ICONS.bell}${state.unread ? html`<span class="badge">${state.unread}</span>` : ''}</a>` : ''}
-      <button class="icon-btn" id="theme" aria-label="Basculer le thème clair/sombre">${ICONS.moon}</button>
-      ${state.user ? html`<a class="icon-btn" href="/mon-espace" aria-label="Mon espace beauté">${ICONS.user}</a>` : html`<a class="btn btn-sm" href="/connexion">Connexion</a>`}
-    </div></div>
-    <div class="drawer" id="drawer"><div id="ds">${searchBox('d', 'Rechercher…')}</div>${NAV.map(([h, l]) => html`<a href="${h}">${l}</a>`)}
+      ${state.user ? html`<a class="icon-btn" href="/notifications" aria-label="Notifications (${state.unread} non lues)">${ICONS.bell}${state.unread ? html`<span class="badge">${state.unread}</span>` : ''}</a><a class="icon-btn" href="/mon-espace" aria-label="Mon espace beauté">${ICONS.user}</a>` : html`<a class="icon-btn" href="/connexion" aria-label="Connexion">${ICONS.user}</a>`}
+    </div></div></div>
+    <div class="search-panel" id="sp" ${open ? '' : 'hidden'}><div class="container"><div id="hs">${searchBox('', 'Un parfum, une marque, une note, un produit...')}</div></div></div>
+    <div class="drawer" id="drawer"><div class="container"><div id="ds">${searchBox('d', 'Rechercher…')}</div>${NAV.map(([h, l]) => html`<a href="${h}">${l}</a>`)}
       <a href="/trouver-mon-parfum">Trouver mon parfum</a><a href="/comparateur-panier">Comparateur de panier</a><a href="/alertes">Alertes de prix</a>${state.user ? html`<a href="/mon-espace">Mon espace beauté</a><a href="/compte">Mon compte</a>${state.user.role === 'admin' ? html`<a href="/admin">Administration</a>` : ''}` : html`<a href="/connexion">Connexion</a><a href="/inscription">Créer un compte</a>`}</div></div>`.s;
-  attachSearch(el.querySelector('#hs'));
+  attachSearch(el.querySelector('#hs'), { onNavigate: () => { el.querySelector('#sp').hidden = true; } });
   attachSearch(el.querySelector('#ds'), { onNavigate: () => el.querySelector('#drawer').classList.remove('open') });
+  const sp = el.querySelector('#sp'), sb = el.querySelector('#sbtn');
+  sb.onclick = () => { sp.hidden = !sp.hidden; sb.setAttribute('aria-expanded', !sp.hidden); if (!sp.hidden) sp.querySelector('input').focus(); };
   const dr = el.querySelector('#drawer'), bg = el.querySelector('#burger');
   bg.onclick = () => { const o = dr.classList.toggle('open'); bg.setAttribute('aria-expanded', o); };
   dr.addEventListener('click', (e) => { if (e.target.closest('a')) dr.classList.remove('open'); });
-  el.querySelector('#theme').onclick = () => { const dark = document.documentElement.dataset.theme !== 'dark' && !(matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.dataset.theme); document.documentElement.dataset.theme = dark ? 'dark' : 'light'; ls.set('velune.theme', dark ? 'dark' : 'light'); };
 }
 import { raw } from './lib.js';
 
 function footer() {
   document.getElementById('site-footer').innerHTML = html`<div class="container"><div class="foot-grid">
-    <div><a class="logo" href="/">MANOU</a><p style="margin-top:.8rem;max-width:34ch">Discover your beauty. Find your value.<br><span class="small">Comparateur indépendant : MANOU ne vend pas les produits et vous redirige vers les boutiques partenaires. Classement non influencé par les commissions d’affiliation.</span></p></div>
+    <div><a class="logo" href="/">MANOU<span>.</span></a><p style="margin-top:.8rem;max-width:34ch">Discover your beauty. Find your value.<br><span class="small">Comparateur indépendant : MANOU ne vend pas les produits et vous redirige vers les boutiques partenaires. Classement non influencé par les commissions d’affiliation.</span></p><p class="small muted">Réseaux sociaux : comptes à venir.</p></div>
     <div><h4>Univers</h4><ul>${NAV.map(([h, l]) => html`<li><a href="${h}">${l}</a></li>`)}<li><a href="/trouver-mon-parfum">Trouver mon parfum</a></li></ul></div>
     <div><h4>Outils</h4><ul><li><a href="/comparateur-panier">Comparateur de panier</a></li><li><a href="/alertes">Alertes de prix</a></li><li><a href="/ingredients">Ingrédients</a></li><li><a href="/guides">Guides</a></li><li><a href="/favoris">Favoris</a></li></ul></div>
     <div><h4>MANOU</h4><ul><li><a href="/a-propos">À propos</a></li><li><a href="/faq">FAQ</a></li><li><a href="/contact">Contact</a></li><li><a href="/mentions-legales">Mentions légales</a></li><li><a href="/confidentialite">Confidentialité</a></li><li><a href="/conditions">Conditions d’utilisation</a></li><li><a href="/cookies">Gestion des cookies</a></li></ul></div>
@@ -60,8 +61,7 @@ export async function refreshUser() {
 }
 
 async function boot() {
-  const t = ls.get('velune.theme', null); if (t) document.documentElement.dataset.theme = t;
-  try { state.meta = await api('/api/meta'); } catch (e) { document.getElementById('app').innerHTML = `<div class="container" style="padding:3rem 0"><div class="notice err">Impossible de charger MANOU : ${esc(e.message)}</div></div>`; return; }
+    try { state.meta = await api('/api/meta'); } catch (e) { document.getElementById('app').innerHTML = `<div class="container" style="padding:3rem 0"><div class="notice err">Impossible de charger MANOU : ${esc(e.message)}</div></div>`; return; }
   await refreshUser();
   header(); footer(); cookieBanner();
   onState(header);
