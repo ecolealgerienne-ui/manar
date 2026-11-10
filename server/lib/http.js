@@ -81,7 +81,7 @@ export async function serveStatic(req, res, root, urlPath) {
     let etag = etagCache.get(key);
     if (!etag) { etag = '"' + createHash('md5').update(buf).digest('hex').slice(0, 16) + '"'; etagCache.set(key, etag); }
     if (req.headers['if-none-match'] === etag) { res.writeHead(304, { ETag: etag }); res.end(); return true; }
-    send(res, 200, buf, { 'Content-Type': MIME[extname(file)] || 'application/octet-stream', 'Cache-Control': 'public, max-age=300, must-revalidate', ETag: etag }, req);
+    send(res, 200, buf, { 'Content-Type': MIME[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache', ETag: etag }, req);
     return true;
   } catch { return false; }
 }
