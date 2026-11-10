@@ -9,7 +9,7 @@ function header() {
   const el = document.getElementById('site-header');
   el.innerHTML = html`<div class="container"><div class="hdr">
     <button class="icon-btn burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="drawer">${ICONS.menu}</button>
-    <a class="logo" href="/" aria-label="MANOU — accueil">MAN<span>O</span>U</a>
+    <a class="logo" href="/" aria-label="MANOU — accueil">manou<span>.</span></a>
     <div class="hdr-search" id="hs">${searchBox('', 'Rechercher un parfum, une marque, un ingrédient…')}</div>
     <nav class="nav" aria-label="Navigation principale">${NAV.map(([h, l]) => html`<a href="${h}" ${raw(cur(h))}>${l}</a>`)}</nav>
     <div class="hdr-actions">
