@@ -1,7 +1,7 @@
-# VELUNE — Discover your beauty. Find your value.
+# MANOU — Discover your beauty. Find your value.
 
 Plateforme de découverte, comparaison et promotions beauté (parfums, skincare, maquillage, cheveux, corps).
-VELUNE **ne vend pas** : elle redirige vers des marchands. **Cette version est une démonstration : tout le catalogue, les marchands, les prix, historiques, avis et codes promo sont fictifs et signalés comme tels.**
+MANOU **ne vend pas** : elle redirige vers des marchands. **Cette version est une démonstration : tout le catalogue, les marchands, les prix, historiques, avis et codes promo sont fictifs et signalés comme tels.**
 
 ## Lancement rapide
 Prérequis : Node.js ≥ 22.13 (SQLite intégré, **aucune dépendance npm**).
@@ -18,3 +18,6 @@ Au premier démarrage, les identifiants de démonstration sont affichés (et éc
 
 ## Documentation
 - [Utilisateur](docs/utilisateur.md) · [Administrateur](docs/administrateur.md) · [Technique](docs/technique.md) · [Déploiement](docs/deploiement.md) · [Fonctionnalités et intégrations restantes](docs/etat-des-lieux.md)
+
+## Identité
+Nom : **Manou**. Couleurs principales : Pantone 18-1553 TCX *Adrenaline Rush* (`--gold-d`, ≈ #CC3F28, légèrement assombri pour la lisibilité du texte blanc) et Pantone 14-4714 TCX *Clear Tides* (`--gold`, ≈ #9ED3DB). Les valeurs hex sont des équivalents écran approximatifs, modifiables en tête de `public/css/style.css`.

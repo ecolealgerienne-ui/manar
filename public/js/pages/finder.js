@@ -9,9 +9,9 @@ export default async function finder() {
   const noteState = {};
   const groups = Object.entries(m.noteGroups);
   return {
-    title: 'Trouver mon parfum — recherche olfactive | VELUNE', desc: 'Combinez familles olfactives, notes de tête, cœur et fond, intensité, saison, occasion et budget.',
+    title: 'Trouver mon parfum — recherche olfactive | MANOU', desc: 'Combinez familles olfactives, notes de tête, cœur et fond, intensité, saison, occasion et budget.',
     html: html`<div class="container" style="padding-top:1.5rem"><div class="crumbs"><a href="/">Accueil</a> › <a href="/parfums">Parfums</a> › Trouver mon parfum</div>
-      <h1>Trouver mon parfum</h1><p class="muted" style="max-width:64ch">Décrivez ce que vous aimez : VELUNE classe les parfums par <strong>score de correspondance</strong> et indique les critères satisfaits. Un parfum qui ne contient qu’une seule des notes recherchées n’est jamais présenté comme parfait.</p>
+      <h1>Trouver mon parfum</h1><p class="muted" style="max-width:64ch">Décrivez ce que vous aimez : MANOU classe les parfums par <strong>score de correspondance</strong> et indique les critères satisfaits. Un parfum qui ne contient qu’une seule des notes recherchées n’est jamais présenté comme parfait.</p>
       <div class="catalog" style="grid-template-columns:minmax(0,420px) 1fr">
       <form id="ff" class="card" style="padding:1.2rem;gap:1rem" autocomplete="off">
         <fieldset class="field" style="border:0;padding:0"><legend><strong>Familles olfactives</strong></legend><div class="chips">${m.families.map((f) => html`<label class="chip" title="${f.desc}" style="cursor:pointer"><input type="checkbox" name="families" value="${f.id}" style="display:none"> ${f.name}</label>`)}</div></fieldset>

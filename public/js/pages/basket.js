@@ -3,9 +3,9 @@ import { navigate } from '../router.js';
 
 export default async function basketPage() {
   return {
-    title: 'Comparateur de panier multi-boutiques | VELUNE', desc: 'Comparez le coût total de votre panier chez chaque marchand, livraison et codes promo compris.',
+    title: 'Comparateur de panier multi-boutiques | MANOU', desc: 'Comparez le coût total de votre panier chez chaque marchand, livraison et codes promo compris.',
     html: html`<div class="container" style="padding-top:1.5rem"><div class="crumbs"><a href="/">Accueil</a> › Comparateur de panier</div><h1>Comparateur de panier</h1>
-      <p class="muted" style="max-width:64ch">Composez un panier virtuel : VELUNE calcule son coût total chez chaque marchand (frais de livraison, franco, codes promo) et cherche la répartition la moins chère entre plusieurs boutiques. VELUNE ne vend rien : vous achetez chez les marchands.</p>
+      <p class="muted" style="max-width:64ch">Composez un panier virtuel : MANOU calcule son coût total chez chaque marchand (frais de livraison, franco, codes promo) et cherche la répartition la moins chère entre plusieurs boutiques. MANOU ne vend rien : vous achetez chez les marchands.</p>
       <div class="catalog" style="grid-template-columns:minmax(0,430px) 1fr">
         <div><div class="card" style="padding:1rem"><h2 style="font-size:1.4rem">Mon panier</h2>
           <div style="position:relative"><label class="sr" for="addq">Ajouter un produit</label><input id="addq" type="search" placeholder="Ajouter un produit (nom, marque…)" autocomplete="off"><div class="suggest" id="addsug" hidden></div></div>

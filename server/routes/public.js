@@ -92,8 +92,8 @@ export function registerPublic(r, { db, cat, nowIso }) {
       deal: p.deal, summary: p.summary,
       priceTypes: {
         announced: 'Prix annoncé par le marchand (offre en cours).',
-        observed: 'Prix historiquement observé par VELUNE (relevés enregistrés ; ici fictifs en démonstration).',
-        reference: 'Prix de référence annoncé par le marchand dans sa promotion (non vérifié par VELUNE).',
+        observed: 'Prix historiquement observé par MANOU (relevés enregistrés ; ici fictifs en démonstration).',
+        reference: 'Prix de référence annoncé par le marchand dans sa promotion (non vérifié par MANOU).',
       },
     };
   }
@@ -137,7 +137,7 @@ export function registerPublic(r, { db, cat, nowIso }) {
     const stats = pts.length ? { min: Math.min(...pts.map((x) => x.price)), max: Math.max(...pts.map((x) => x.price)), avg: round2(pts.reduce((s, x) => s + x.price, 0) / pts.length), last: pts.at(-1).day, count: pts.length } : null;
     return {
       format: { id: f.id, label: f.label }, period: days, points: pts, stats, current: cur,
-      demo: pts.length > 0, notice: pts.length ? 'Historique fictif généré pour la démonstration : ce ne sont pas des relevés réels.' : 'Pas encore d’historique : ce produit vient d’être ajouté. VELUNE n’invente pas de données.',
+      demo: pts.length > 0, notice: pts.length ? 'Historique fictif généré pour la démonstration : ce ne sont pas des relevés réels.' : 'Pas encore d’historique : ce produit vient d’être ajouté. MANOU n’invente pas de données.',
       referencePrice: best?.priceOrig ?? null,
     };
   });

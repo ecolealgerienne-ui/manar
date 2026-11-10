@@ -115,7 +115,7 @@ export default async function product(ctx) {
   const st = { formatId: d.formats.find((f) => f.best)?.id ?? d.formats[0]?.id, sort: 'total', onlyVerified: false, period: 30 };
   const fav = state.favIds.has(p.id);
   return {
-    title: `${p.brand} ${p.name}${p.concentration ? ' ' + CONC[p.concentration] : ''} — comparer les prix | VELUNE`, desc: p.description?.slice(0, 160),
+    title: `${p.brand} ${p.name}${p.concentration ? ' ' + CONC[p.concentration] : ''} — comparer les prix | MANOU`, desc: p.description?.slice(0, 160),
     html: html`<div class="container">${head(d)}
       <div class="pdp"><div class="pdp-img"><img src="${p.image}" alt="Illustration de démonstration : ${p.brand} ${p.name}" width="360" height="320"></div>
       <div>
@@ -202,7 +202,7 @@ export async function comparator(ctx) {
   const d = await api('/api/products/' + ctx.params[0]);
   const st = { formatId: d.formats.find((f) => f.best)?.id ?? d.formats[0]?.id, sort: 'total', onlyVerified: false, period: 90 };
   return {
-    title: `Comparateur de prix — ${d.product.brand} ${d.product.name} | VELUNE`,
+    title: `Comparateur de prix — ${d.product.brand} ${d.product.name} | MANOU`,
     html: html`<div class="container">${head(d)}<h1>Comparateur — ${d.product.brand} ${d.product.name}</h1><p><a href="/produit/${d.product.slug}">← Retour à la fiche</a></p>
       <section id="prix"><h2>Prix par marchand</h2><div id="price-body">${priceSection(d, st)}</div></section>
       <section style="margin-top:3rem"><h2>Valeur</h2>${valueSection(d)}</section>
@@ -228,7 +228,7 @@ export async function similar(ctx) {
   const base = await api(`/api/products/${slug}/similar`, { query: { cheaper: ctx.query.cheaper, maxPrice: ctx.query.maxPrice } });
   const p = base.product;
   return {
-    title: `Produits similaires à ${p.brand} ${p.name} | VELUNE`,
+    title: `Produits similaires à ${p.brand} ${p.name} | MANOU`,
     html: html`<div class="container"><div class="crumbs"><a href="/">Accueil</a> › <a href="/produit/${p.slug}">${p.brand} ${p.name}</a> › Alternatives</div>
       <h1>Alternatives à ${p.name}</h1><p class="muted">${base.method}</p>
       <form id="sf" class="row" style="margin:1rem 0"><label class="check" style="margin:0"><input type="checkbox" name="cheaper" value="1" ${ctx.query.cheaper === '1' ? 'checked' : ''}> Trouver une alternative moins chère</label>

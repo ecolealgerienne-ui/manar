@@ -5,12 +5,12 @@ const SECTIONS = [['', 'Tableau de bord'], ['produits', 'Produits'], ['marques',
 
 export default async function admin(ctx) {
   if (!state.user) throw Object.assign(new Error('Connexion requise'), { status: 401 });
-  if (state.user.role !== 'admin') return { title: 'Accès refusé | VELUNE', html: html`<div class="container narrow" style="padding:4rem 0"><h1>Accès réservé</h1><p>Cet espace est réservé aux administrateurs.</p><a class="btn" href="/">Accueil</a></div>` };
+  if (state.user.role !== 'admin') return { title: 'Accès refusé | MANOU', html: html`<div class="container narrow" style="padding:4rem 0"><h1>Accès réservé</h1><p>Cet espace est réservé aux administrateurs.</p><a class="btn" href="/">Accueil</a></div>` };
   const sec = ctx.params[0] || '';
   const fn = { '': overview, produits: products, marques: brands, marchands: merchants, offres: offers, codes: codes, utilisateurs: users, signalements: reports, rapprochements: matches, journal: journal, messages: messages }[sec];
   if (!fn) return { title: 'Administration', html: html`<div class="container" style="padding:3rem 0"><h1>Section inconnue</h1></div>` };
   return {
-    title: 'Administration | VELUNE',
+    title: 'Administration | MANOU',
     html: html`<div class="container"><div class="admin"><nav aria-label="Administration">${SECTIONS.map(([s, l]) => html`<a href="/admin${s ? '/' + s : ''}" ${s === sec ? raw('aria-current="page"') : ''}>${l}</a>`)}</nav><div id="adm"><div class="loading"><span class="spinner"></span>Chargement…</div></div></div></div>`,
     async mount(root) {
       const box = root.querySelector('#adm');

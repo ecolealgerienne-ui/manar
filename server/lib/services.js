@@ -146,7 +146,7 @@ export function checkAlerts(db, catalog, { alertId } = {}) {
     if (!user) continue;
     const msg = `${p.brand} ${p.name} (${f.label}) est à ${ok.price.toFixed(2).replace('.', ',')} € chez ${ok.merchant.name}, sous votre seuil de ${a.target_price.toFixed(2).replace('.', ',')} €. Offre vérifiée le ${new Date(ok.fetchedAt).toLocaleDateString('fr-FR')}.`;
     db.prepare('INSERT INTO notifications (user_id,kind,message,link,created_at) VALUES (?,?,?,?,?)').run(a.user_id, 'alert', msg, `/produit/${p.slug}`, nowIso());
-    db.prepare('INSERT INTO email_outbox (user_id,to_email,subject,body,created_at) VALUES (?,?,?,?,?)').run(a.user_id, user.email, `VELUNE — alerte de prix : ${p.name}`, msg, nowIso());
+    db.prepare('INSERT INTO email_outbox (user_id,to_email,subject,body,created_at) VALUES (?,?,?,?,?)').run(a.user_id, user.email, `MANOU — alerte de prix : ${p.name}`, msg, nowIso());
     db.prepare('UPDATE alerts SET last_triggered=?, last_notified_price=? WHERE id=?').run(nowIso(), ok.price, a.id);
     sent++;
   }

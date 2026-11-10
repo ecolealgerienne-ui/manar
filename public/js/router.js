@@ -44,13 +44,13 @@ export async function render(path, { scroll = true } = {}) {
       const m = re.exec(url.pathname.replace(/\/+$/, '') || '/');
       if (m) { result = await loader({ params: m.slice(1), query: Object.fromEntries(url.searchParams), path: url.pathname, url }); break; }
     }
-    if (!result) result = { title: 'Page introuvable | VELUNE', html: html`<div class="container" style="padding:4rem 0"><h1>Page introuvable</h1><p>La page demandée n’existe pas ou a été déplacée.</p><a class="btn btn-primary" href="/">Retour à l’accueil</a></div>` };
+    if (!result) result = { title: 'Page introuvable | MANOU', html: html`<div class="container" style="padding:4rem 0"><h1>Page introuvable</h1><p>La page demandée n’existe pas ou a été déplacée.</p><a class="btn btn-primary" href="/">Retour à l’accueil</a></div>` };
   } catch (e) {
-    result = { title: 'Erreur | VELUNE', html: html`<div class="container narrow" style="padding:4rem 0"><h1>${e.status === 404 ? 'Introuvable' : 'Une erreur est survenue'}</h1><p>${e.message || 'Réessayez dans un instant.'}</p><p><a class="btn" href="/">Accueil</a> <button class="btn btn-primary" id="retry">Réessayer</button></p></div>`, mount: (r) => r.querySelector('#retry')?.addEventListener('click', () => render(path)) };
+    result = { title: 'Erreur | MANOU', html: html`<div class="container narrow" style="padding:4rem 0"><h1>${e.status === 404 ? 'Introuvable' : 'Une erreur est survenue'}</h1><p>${e.message || 'Réessayez dans un instant.'}</p><p><a class="btn" href="/">Accueil</a> <button class="btn btn-primary" id="retry">Réessayer</button></p></div>`, mount: (r) => r.querySelector('#retry')?.addEventListener('click', () => render(path)) };
     if (e.status === 401) { navigate('/connexion?next=' + encodeURIComponent(url.pathname + url.search), { replace: true }); return; }
   }
   if (my !== token) return;
-  document.title = result.title || 'VELUNE';
+  document.title = result.title || 'MANOU';
   const md = document.querySelector('meta[name=description]'); if (md && result.desc) md.setAttribute('content', result.desc);
   app.innerHTML = result.html.s;
   result.mount?.(app);

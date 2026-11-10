@@ -1,6 +1,6 @@
 :root{
-  --ivory:#F7F5F0;--beige:#E8E1D7;--taupe:#A79B8C;--ink:#242321;--white:#fff;--gold:#C5AA83;
-  --gold-d:#8F7650;--ok:#3C6E4F;--warn:#9A6A1F;--bad:#9B3B33;--muted:#6B6458;
+  --ivory:#F7F5F0;--beige:#E8E1D7;--taupe:#A79B8C;--ink:#242321;--white:#fff;--gold:#9ED3DB;
+  --gold-d:#CC3F28;--ok:#2E7D6B;--warn:#9A6A1F;--bad:#9B3B33;--muted:#6B6458;
   --bg:var(--ivory);--surface:var(--white);--line:var(--beige);--text:var(--ink);
   --serif:"Cormorant Garamond","Playfair Display",Georgia,"Times New Roman",serif;
   --sans:Inter,"Helvetica Neue",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;

@@ -9,7 +9,7 @@ function header() {
   const el = document.getElementById('site-header');
   el.innerHTML = html`<div class="container"><div class="hdr">
     <button class="icon-btn burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="drawer">${ICONS.menu}</button>
-    <a class="logo" href="/" aria-label="VELUNE — accueil">VELU<span>N</span>E</a>
+    <a class="logo" href="/" aria-label="MANOU — accueil">MAN<span>O</span>U</a>
     <div class="hdr-search" id="hs">${searchBox('', 'Rechercher un parfum, une marque, un ingrédient…')}</div>
     <nav class="nav" aria-label="Navigation principale">${NAV.map(([h, l]) => html`<a href="${h}" ${raw(cur(h))}>${l}</a>`)}</nav>
     <div class="hdr-actions">
@@ -32,17 +32,17 @@ import { raw } from './lib.js';
 
 function footer() {
   document.getElementById('site-footer').innerHTML = html`<div class="container"><div class="foot-grid">
-    <div><a class="logo" href="/">VELUNE</a><p style="margin-top:.8rem;max-width:34ch">Discover your beauty. Find your value.<br><span class="small">Comparateur indépendant : VELUNE ne vend pas les produits et vous redirige vers les boutiques partenaires. Classement non influencé par les commissions d’affiliation.</span></p></div>
+    <div><a class="logo" href="/">MANOU</a><p style="margin-top:.8rem;max-width:34ch">Discover your beauty. Find your value.<br><span class="small">Comparateur indépendant : MANOU ne vend pas les produits et vous redirige vers les boutiques partenaires. Classement non influencé par les commissions d’affiliation.</span></p></div>
     <div><h4>Univers</h4><ul>${NAV.map(([h, l]) => html`<li><a href="${h}">${l}</a></li>`)}<li><a href="/trouver-mon-parfum">Trouver mon parfum</a></li></ul></div>
     <div><h4>Outils</h4><ul><li><a href="/comparateur-panier">Comparateur de panier</a></li><li><a href="/alertes">Alertes de prix</a></li><li><a href="/ingredients">Ingrédients</a></li><li><a href="/guides">Guides</a></li><li><a href="/favoris">Favoris</a></li></ul></div>
-    <div><h4>VELUNE</h4><ul><li><a href="/a-propos">À propos</a></li><li><a href="/faq">FAQ</a></li><li><a href="/contact">Contact</a></li><li><a href="/mentions-legales">Mentions légales</a></li><li><a href="/confidentialite">Confidentialité</a></li><li><a href="/conditions">Conditions d’utilisation</a></li><li><a href="/cookies">Gestion des cookies</a></li></ul></div>
-  </div><div class="foot-bottom">© ${new Date().getFullYear()} VELUNE — Version de démonstration : données fictives. Les prix peuvent varier ; vérifiez-les sur le site du marchand. Liens vers les marchands : liens affiliés possibles, signalés.</div></div>`.s;
+    <div><h4>MANOU</h4><ul><li><a href="/a-propos">À propos</a></li><li><a href="/faq">FAQ</a></li><li><a href="/contact">Contact</a></li><li><a href="/mentions-legales">Mentions légales</a></li><li><a href="/confidentialite">Confidentialité</a></li><li><a href="/conditions">Conditions d’utilisation</a></li><li><a href="/cookies">Gestion des cookies</a></li></ul></div>
+  </div><div class="foot-bottom">© ${new Date().getFullYear()} MANOU — Version de démonstration : données fictives. Les prix peuvent varier ; vérifiez-les sur le site du marchand. Liens vers les marchands : liens affiliés possibles, signalés.</div></div>`.s;
 }
 
 function cookieBanner() {
   const root = document.getElementById('cookie-root');
   if (ls.get('velune.cookies', null)) { root.innerHTML = ''; return; }
-  root.innerHTML = html`<div class="cookie" role="dialog" aria-label="Cookies"><p style="margin-bottom:.7rem"><strong>Votre vie privée</strong><br><span class="small">VELUNE n’utilise qu’un cookie de session nécessaire après connexion. Aucune publicité ni mesure d’audience. Vous pouvez autoriser la personnalisation (mémoire de vos recherches) — refusée par défaut.</span></p>
+  root.innerHTML = html`<div class="cookie" role="dialog" aria-label="Cookies"><p style="margin-bottom:.7rem"><strong>Votre vie privée</strong><br><span class="small">MANOU n’utilise qu’un cookie de session nécessaire après connexion. Aucune publicité ni mesure d’audience. Vous pouvez autoriser la personnalisation (mémoire de vos recherches) — refusée par défaut.</span></p>
     <div class="row"><button class="btn btn-primary btn-sm" id="ck-ok">Accepter la personnalisation</button><button class="btn btn-sm" id="ck-no">Refuser</button><a class="small" href="/cookies">Gérer</a></div></div>`.s;
   const set = (perso) => { ls.set('velune.cookies', { perso, at: Date.now() }); root.innerHTML = ''; if (state.user) api('/api/me', { method: 'PUT', body: { profile: { ...state.user.profile, consentPerso: perso } } }).then((u) => { state.user = u; }).catch(() => {}); };
   root.querySelector('#ck-ok').onclick = () => set(true);
@@ -61,7 +61,7 @@ export async function refreshUser() {
 
 async function boot() {
   const t = ls.get('velune.theme', null); if (t) document.documentElement.dataset.theme = t;
-  try { state.meta = await api('/api/meta'); } catch (e) { document.getElementById('app').innerHTML = `<div class="container" style="padding:3rem 0"><div class="notice err">Impossible de charger VELUNE : ${esc(e.message)}</div></div>`; return; }
+  try { state.meta = await api('/api/meta'); } catch (e) { document.getElementById('app').innerHTML = `<div class="container" style="padding:3rem 0"><div class="notice err">Impossible de charger MANOU : ${esc(e.message)}</div></div>`; return; }
   await refreshUser();
   header(); footer(); cookieBanner();
   onState(header);

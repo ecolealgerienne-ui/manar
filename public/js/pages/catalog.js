@@ -46,7 +46,7 @@ async function build({ info, cat, ctx, searchMode }) {
   const subs = info ? SUBS[ctx.path.slice(1)] : [];
   const title = searchMode ? (P.q ? `Résultats pour « ${P.q} »` : 'Recherche') : info.title;
   return {
-    title: `${title} | VELUNE`, desc: info?.desc || 'Recherche de produits beauté : nom, marque, notes, ingrédients, budget.',
+    title: `${title} | MANOU`, desc: info?.desc || 'Recherche de produits beauté : nom, marque, notes, ingrédients, budget.',
     html: html`<div class="container" style="padding-top:1.5rem">
       ${searchMode ? html`<h1 class="sr">Recherche</h1><div id="s-top" style="max-width:720px;margin:0 auto 1.5rem">${searchBox('lg', 'Ex. : crème hydratante acide hyaluronique peau sèche', P.q || '')}</div>` : html`<div class="crumbs"><a href="/">Accueil</a> › ${info.title}</div><h1>${info.title}</h1><p class="muted" style="max-width:62ch">${info.intro}</p>
         ${info.category === 'parfum' ? html`<p><a class="btn btn-gold" href="/trouver-mon-parfum">Trouver mon parfum (recherche olfactive)</a></p>` : ''}

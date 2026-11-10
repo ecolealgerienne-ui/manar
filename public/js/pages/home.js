@@ -1,12 +1,12 @@
 import { html, api, grid, searchBox, attachSearch, eur, state, CAT_NAMES, productCard, dateFr } from '../lib.js';
 
-const TILES = [['parfum', 'Parfums', '/parfums', '#8F7650'], ['skincare', 'Skincare', '/skincare', '#7C8B6B'], ['maquillage', 'Maquillage', '/maquillage', '#9A5B52'], ['cheveux', 'Cheveux', '/cheveux-corps', '#5E6B7C'], ['corps', 'Corps', '/cheveux-corps', '#A58B6B']];
+const TILES = [['parfum', 'Parfums', '/parfums', '#CC3F28'], ['skincare', 'Skincare', '/skincare', '#3E8E9C'], ['maquillage', 'Maquillage', '/maquillage', '#B5382A'], ['cheveux', 'Cheveux', '/cheveux-corps', '#4F9FB0'], ['corps', 'Corps', '/cheveux-corps', '#2F6F7D']];
 
 export default async function home() {
   const d = await api('/api/home');
   const pop = state.meta.popularSearches;
   return {
-    title: 'VELUNE — Comparateur beauté : parfums, skincare, maquillage', desc: 'La beauté que vous aimez, au meilleur prix. Découvrez, comparez, économisez.',
+    title: 'MANOU — Comparateur beauté : parfums, skincare, maquillage', desc: 'La beauté que vous aimez, au meilleur prix. Découvrez, comparez, économisez.',
     html: html`
     <section class="hero"><div class="container">
       <p class="eyebrow">Discover your beauty. Find your value.</p>
@@ -54,7 +54,7 @@ export default async function home() {
     </div></section>
 
     <section class="block"><div class="container">
-      <div class="center" style="margin-bottom:2.5rem"><p class="eyebrow">Notre approche</p><h2>Pourquoi VELUNE ?</h2></div>
+      <div class="center" style="margin-bottom:2.5rem"><p class="eyebrow">Notre approche</p><h2>Pourquoi MANOU ?</h2></div>
       <div class="pillars">
         <div class="pillar"><div class="n">01</div><h3>Comparaison transparente</h3><p class="muted">Prix annoncé, prix de référence et prix historiquement observé sont distingués. Prix au ml et livraison inclus. Classement jamais fondé sur les commissions.</p></div>
         <div class="pillar"><div class="n">02</div><h3>Marchands sélectionnés</h3><p class="muted">Chaque marchand est typé (officiel, revendeur vérifié, marketplace…) avec la date de son dernier contrôle. Nous ne garantissons pas l’authenticité sans preuve.</p></div>

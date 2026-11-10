@@ -1,7 +1,7 @@
 {
-  "name": "velune",
+  "name": "manou",
   "version": "1.0.0",
-  "description": "VELUNE — plateforme de découverte, comparaison et promotions beauté",
+  "description": "MANOU — plateforme de découverte, comparaison et promotions beauté",
   "type": "module",
   "private": true,
   "engines": { "node": ">=22.13" },

@@ -68,10 +68,10 @@ export function createApp(db, opts = {}) {
     const o = db.prepare('SELECT o.*, m.name mname, m.type mtype FROM offers o JOIN merchants m ON m.id=o.merchant_id WHERE o.id=?').get(offerId);
     if (!o) return send(res, 404, 'Offre introuvable', { 'Content-Type': 'text/plain; charset=utf-8' });
     const f = cat.formatById.get(o.format_id); const p = f && cat.productById.get(f.productId);
-    const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Redirection vers ${esc(o.mname)} | VELUNE</title><link rel="stylesheet" href="/css/style.css"></head><body><main class="container narrow" style="padding:4rem 0"><h1>Vous quittez VELUNE</h1>
+    const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Redirection vers ${esc(o.mname)} | MANOU</title><link rel="stylesheet" href="/css/style.css"></head><body><main class="container narrow" style="padding:4rem 0"><h1>Vous quittez MANOU</h1>
 <p>Vous allez être redirigé vers <strong>${esc(o.mname)}</strong> pour <strong>${esc(p ? p.brand + ' ' + p.name : '')}</strong> (${esc(f?.label || '')}).</p>
 <p class="notice demo">Cette offre est une <strong>donnée de démonstration</strong>. L’adresse ci-dessous est fictive (domaine <code>.invalid</code>) et ne mène à aucune boutique réelle.</p>
-<p class="muted">Lien affilié : en production, VELUNE peut percevoir une commission si vous achetez via ce lien, sans surcoût pour vous. Le classement n’en dépend pas. Vérifiez le prix et les conditions sur le site du marchand.</p>
+<p class="muted">Lien affilié : en production, MANOU peut percevoir une commission si vous achetez via ce lien, sans surcoût pour vous. Le classement n’en dépend pas. Vérifiez le prix et les conditions sur le site du marchand.</p>
 <p><a class="btn btn-primary" rel="sponsored nofollow noopener" href="${esc(o.url)}">Continuer vers ${esc(o.mname)}</a> <a class="btn" href="${p ? '/produit/' + p.slug : '/'}">Retour</a></p></main></body></html>`;
     send(res, 200, html, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }, req);
   }

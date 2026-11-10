@@ -12,5 +12,5 @@ if (db.prepare('SELECT COUNT(*) c FROM products').get().c === 0) {
 }
 const app = createApp(db, { dev: process.env.NODE_ENV !== 'production' });
 checkAlerts(db, app.cat);
-app.server.listen(port, process.env.HOST || '0.0.0.0', () => console.log(`VELUNE démarré sur http://localhost:${port}`));
+app.server.listen(port, process.env.HOST || '0.0.0.0', () => console.log(`MANOU démarré sur http://localhost:${port}`));
 process.on('SIGTERM', () => { app.close(); process.exit(0); });

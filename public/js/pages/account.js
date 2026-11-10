@@ -6,9 +6,9 @@ import { refreshUser } from '../app.js';
 export async function auth(ctx) {
   const reg = ctx.path === '/inscription';
   const next = ctx.query.next && ctx.query.next.startsWith('/') ? ctx.query.next : '/mon-espace';
-  if (state.user) { await navigate(next, { replace: true }); return { title: 'VELUNE', html: html`` }; }
+  if (state.user) { await navigate(next, { replace: true }); return { title: 'MANOU', html: html`` }; }
   return {
-    title: `${reg ? 'Créer un compte' : 'Connexion'} | VELUNE`,
+    title: `${reg ? 'Créer un compte' : 'Connexion'} | MANOU`,
     html: html`<div class="container narrow" style="padding:3rem 0"><h1>${reg ? 'Créer un compte' : 'Connexion'}</h1>
       <form id="af" class="card" style="padding:1.5rem" novalidate>
         ${reg ? html`<div class="field"><label for="n">Prénom ou pseudo (facultatif)</label><input id="n" name="name" autocomplete="given-name" maxlength="80"></div>` : ''}
@@ -30,7 +30,7 @@ export async function auth(ctx) {
         const btn = form.querySelector('button[type=submit]'); btn.disabled = true;
         try {
           await api(reg ? '/api/auth/register' : '/api/auth/login', { method: 'POST', body: reg ? { ...v, acceptTerms: !!v.acceptTerms, consentPerso: !!v.consentPerso } : v });
-          await refreshUser(); toast(reg ? 'Bienvenue sur VELUNE !' : 'Connexion réussie');
+          await refreshUser(); toast(reg ? 'Bienvenue sur MANOU !' : 'Connexion réussie');
           navigate(reg ? '/profil-beaute?welcome=1' : (state.user.role === 'admin' && !ctx.query.next ? '/admin' : next));
         } catch (er) { btn.disabled = false; showFieldErrors(form, er); }
       });
@@ -49,7 +49,7 @@ export async function profile(ctx) {
   const pf = u.profile || {}; const P = pf.parfum || {}, S = pf.skincare || {}, M = pf.maquillage || {}, H = pf.cheveux || {};
   const m = state.meta;
   return {
-    title: 'Mon profil beauté | VELUNE',
+    title: 'Mon profil beauté | MANOU',
     html: html`<div class="container narrow" style="padding:2rem 0"><h1>Mon profil beauté</h1>
       ${ctx.query.welcome ? html`<div class="notice ok">Votre compte est créé. Le questionnaire ci-dessous est <strong>facultatif</strong> : renseignez ce que vous voulez, vous pourrez tout modifier ou supprimer.</div>` : ''}
       <p class="muted">Ces préférences servent uniquement à personnaliser vos recommandations. Elles ne constituent pas un diagnostic médical et vous pouvez les modifier ou les supprimer à tout moment.</p>
@@ -104,7 +104,7 @@ export async function dashboard() {
   const d = await api('/api/me/dashboard');
   const R = d.recommendations;
   return {
-    title: 'Mon espace beauté | VELUNE',
+    title: 'Mon espace beauté | MANOU',
     html: html`<div class="container" style="padding:2rem 0"><div class="sec-head"><div><p class="eyebrow">Mon espace beauté</p><h1>Bonjour${d.user.name ? ' ' + d.user.name : ''}</h1></div><div class="row"><a class="btn" href="/profil-beaute">Modifier mon profil</a><a class="btn" href="/compte">Mon compte</a>${d.user.role === 'admin' ? html`<a class="btn btn-primary" href="/admin">Administration</a>` : ''}</div></div>
       <div class="grid g3" style="margin-bottom:2rem">
         <div class="card" style="padding:1.2rem"><h3>Mes catégories favorites</h3>${d.favoriteCategories.length ? html`<div class="chips">${d.favoriteCategories.map((c) => html`<span class="chip">${c.name} · ${c.count}</span>`)}</div>` : html`<p class="muted small">Ajoutez des favoris pour voir apparaître vos catégories.</p>`}</div>
@@ -131,11 +131,11 @@ export async function favorites() {
   if (!state.user) {
     const ids = [...state.favIds];
     const items = ids.length ? (await api('/api/products/lookup', { method: 'POST', body: { ids } })).items : [];
-    return { title: 'Favoris | VELUNE', html: html`<div class="container" style="padding:2rem 0"><h1>Mes favoris</h1><div class="notice">Vos favoris sont enregistrés dans ce navigateur. <a href="/inscription?next=/favoris">Créez un compte</a> pour les retrouver partout, créer plusieurs listes et suivre leurs prix.</div>${items.length ? grid(items) : empty('Aucun favori', 'Cliquez sur ♡ sur un produit pour l’ajouter.', html`<a class="btn" href="/parfums">Explorer</a>`)}</div>` };
+    return { title: 'Favoris | MANOU', html: html`<div class="container" style="padding:2rem 0"><h1>Mes favoris</h1><div class="notice">Vos favoris sont enregistrés dans ce navigateur. <a href="/inscription?next=/favoris">Créez un compte</a> pour les retrouver partout, créer plusieurs listes et suivre leurs prix.</div>${items.length ? grid(items) : empty('Aucun favori', 'Cliquez sur ♡ sur un produit pour l’ajouter.', html`<a class="btn" href="/parfums">Explorer</a>`)}</div>` };
   }
   const { lists } = await api('/api/lists');
   return {
-    title: 'Mes favoris et listes | VELUNE',
+    title: 'Mes favoris et listes | MANOU',
     html: html`<div class="container" style="padding:2rem 0"><div class="sec-head"><h1 style="margin:0">Mes favoris et listes</h1><form id="nl" class="row"><label class="sr" for="nln">Nom de la nouvelle liste</label><input id="nln" name="name" placeholder="Ex. Ma routine skincare" maxlength="60" required style="width:240px"><button class="btn btn-primary btn-sm">Créer une liste</button></form></div>
       <p class="muted small">Idées : « Ma wishlist parfum », « Ma routine skincare », « À acheter prochainement », « Mes produits habituels ».</p>
       ${lists.map((l) => html`<section class="card" style="padding:1.2rem;margin-bottom:1.5rem" data-list="${l.id}"><div class="row between"><h2 style="margin:0;font-size:1.5rem">${l.name} <span class="small muted">(${l.items.length})</span></h2>${l.isDefault ? '' : html`<span><button class="btn btn-sm" data-rename="${l.id}" data-name="${l.name}">Renommer</button> <button class="btn btn-sm btn-danger" data-delete="${l.id}">Supprimer</button></span>`}</div>
@@ -159,7 +159,7 @@ export async function favorites() {
 export async function alerts() {
   const { alerts } = await api('/api/alerts');
   return {
-    title: 'Alertes de prix | VELUNE',
+    title: 'Alertes de prix | MANOU',
     html: html`<div class="container" style="padding:2rem 0"><h1>Alertes de prix</h1><p class="muted" style="max-width:64ch">Créez une alerte depuis la fiche d’un produit. Vous êtes prévenu uniquement lorsqu’une offre <strong>vérifiée</strong>, disponible, non expirée et non périmée passe sous votre prix cible. Notifications dans le centre de notifications ; l’email nécessite la configuration d’un serveur SMTP (non connecté en démonstration).</p>
       ${alerts.length ? html`<div class="table-wrap"><table class="t stack"><thead><tr><th>Produit</th><th>Format</th><th>Prix actuel</th><th>Prix cible</th><th>État</th><th></th></tr></thead><tbody>${alerts.map((a) => html`<tr><td data-l="Produit"><a href="/produit/${a.product.slug}"><strong>${a.product.brand}</strong> ${a.product.name}</a></td><td data-l="Format">${a.format.label}</td>
         <td data-l="Prix actuel">${eur(a.currentPrice)}${a.currentTrustedPrice == null && a.currentPrice != null ? html`<div class="small muted">offre non vérifiée</div>` : ''}</td>
@@ -184,7 +184,7 @@ export async function alerts() {
 export async function notifications() {
   const r = await api('/api/notifications');
   return {
-    title: 'Notifications | VELUNE',
+    title: 'Notifications | MANOU',
     html: html`<div class="container narrow" style="padding:2rem 0"><div class="sec-head"><h1 style="margin:0">Notifications</h1>${r.unread ? html`<button class="btn btn-sm" id="readall">Tout marquer comme lu</button>` : ''}</div>
       ${r.items.length ? r.items.map((n) => html`<div class="card" style="padding:1rem;margin-bottom:.7rem;${n.read ? 'opacity:.75' : 'border-color:var(--gold)'}"><div class="row between"><span class="small muted">${dateTimeFr(n.created_at)} ${n.read ? '' : html`<span class="tag gold">Nouveau</span>`}</span><button class="link small" data-del="${n.id}">Supprimer</button></div><p style="margin:.3rem 0">${n.message}</p>${n.link ? html`<a href="${n.link}">Voir le produit</a>` : ''}</div>`)
         : empty('Aucune notification', 'Vos alertes de prix apparaîtront ici.')}</div>`,
@@ -200,7 +200,7 @@ export async function notifications() {
 export async function settings() {
   const u = state.user; if (!u) throw Object.assign(new Error('Connexion requise'), { status: 401 });
   return {
-    title: 'Mon compte | VELUNE',
+    title: 'Mon compte | MANOU',
     html: html`<div class="container narrow" style="padding:2rem 0"><h1>Mon compte</h1>
       <form id="inf" class="card" style="padding:1.2rem;margin-bottom:1.2rem"><h2 style="font-size:1.4rem">Informations</h2><div class="field"><label>Email</label><input value="${u.email}" disabled></div><div class="field"><label for="nm">Prénom ou pseudo</label><input id="nm" name="name" value="${u.name || ''}" maxlength="80"></div><button class="btn btn-primary btn-sm">Enregistrer</button></form>
       <form id="pwf" class="card" style="padding:1.2rem;margin-bottom:1.2rem"><h2 style="font-size:1.4rem">Mot de passe</h2><div class="field"><label for="cp">Mot de passe actuel</label><input id="cp" name="current" type="password" autocomplete="current-password" required></div><div class="field"><label for="np">Nouveau mot de passe</label><input id="np" name="password" type="password" autocomplete="new-password" required minlength="10"></div><button class="btn btn-primary btn-sm">Changer</button></form>

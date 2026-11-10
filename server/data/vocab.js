@@ -115,7 +115,7 @@ export const GUIDES = [
     body: [
       ['Pourquoi des familles ?', 'Les familles olfactives regroupent les parfums selon leur caractère dominant. Elles servent de repère, pas de règle : un même parfum peut relever de plusieurs familles.'],
       ['Les grandes familles', 'Florale (rose, jasmin, iris), orientale/ambrée (ambre, vanille, résines), boisée (santal, cèdre, vétiver), hespéridée (agrumes), gourmande (vanille, caramel, praline), chyprée (agrumes, mousse de chêne, patchouli), fougère (lavande, coumarine), aromatique, aquatique, cuirée et épicée.'],
-      ['Comment s’en servir sur VELUNE', 'Sélectionnez une ou plusieurs familles dans « Trouver mon parfum », ajoutez les notes que vous aimez ou voulez éviter : VELUNE classe les résultats par score de correspondance indicatif et explique chaque recommandation.'],
+      ['Comment s’en servir sur MANOU', 'Sélectionnez une ou plusieurs familles dans « Trouver mon parfum », ajoutez les notes que vous aimez ou voulez éviter : MANOU classe les résultats par score de correspondance indicatif et explique chaque recommandation.'],
     ],
   },
   {
@@ -124,7 +124,7 @@ export const GUIDES = [
     body: [
       ['La concentration', 'Les appellations indiquent en général une concentration croissante en composition parfumante : eau de Cologne, eau de toilette (EDT), eau de parfum (EDP), extrait de parfum. Les pourcentages exacts ne sont pas normalisés et varient selon les maisons.'],
       ['Tenue et sillage', 'Une concentration plus élevée donne souvent plus de tenue, mais la structure de la formule compte autant. Une EDT bien construite peut surpasser une EDP légère.'],
-      ['Prix', 'L’extrait coûte généralement plus cher au millilitre. Utilisez le comparateur de valeur de VELUNE pour comparer le prix au ml entre formats et concentrations.'],
+      ['Prix', 'L’extrait coûte généralement plus cher au millilitre. Utilisez le comparateur de valeur de MANOU pour comparer le prix au ml entre formats et concentrations.'],
     ],
   },
   {
@@ -150,18 +150,18 @@ export const GUIDES = [
     desc: 'Prix au ml, livraison, historique : les bons réflexes pour mesurer une vraie économie.',
     body: [
       ['Prix le plus bas ≠ meilleure réduction', 'Une réduction affichée de 30 % peut partir d’un prix de départ gonflé. Regardez le prix final et le prix au ml.'],
-      ['Ne pas oublier la livraison', 'Une offre à 2 € de moins peut coûter plus cher après frais de port. Le comparateur de panier de VELUNE calcule le total par boutique.'],
-      ['L’historique des prix', 'Un prix proche du minimum observé est un meilleur signal qu’un pourcentage de remise. VELUNE ne qualifie une offre d’exceptionnelle que s’il dispose d’un historique suffisant.'],
+      ['Ne pas oublier la livraison', 'Une offre à 2 € de moins peut coûter plus cher après frais de port. Le comparateur de panier de MANOU calcule le total par boutique.'],
+      ['L’historique des prix', 'Un prix proche du minimum observé est un meilleur signal qu’un pourcentage de remise. MANOU ne qualifie une offre d’exceptionnelle que s’il dispose d’un historique suffisant.'],
     ],
   },
 ];
 
 export const FAQ = [
-  ['VELUNE vend-il des produits ?', 'Non. VELUNE est un comparateur : nous vous redirigeons vers les boutiques partenaires, où vous finalisez votre achat.'],
+  ['MANOU vend-il des produits ?', 'Non. MANOU est un comparateur : nous vous redirigeons vers les boutiques partenaires, où vous finalisez votre achat.'],
   ['Les prix affichés sont-ils garantis ?', 'Non. Chaque offre affiche sa date de dernière vérification. Le prix et la disponibilité peuvent changer sur le site marchand : vérifiez-les avant d’acheter.'],
   ['Les données du site sont-elles réelles ?', 'Dans cette version de démonstration, tout le catalogue, les marchands, les prix, les historiques et les avis sont fictifs et signalés comme tels. Aucun prix n’est une offre réelle.'],
   ['Comment fonctionne le score de similarité ?', 'C’est un indicateur calculé à partir de critères visibles (notes, accords, famille, concentration, prix). Ce n’est pas une mesure scientifique et un parfum « proche » n’est jamais une copie.'],
-  ['VELUNE est-il rémunéré ?', 'VELUNE peut percevoir une commission d’affiliation lorsque vous achetez via un lien partenaire. Elle n’influence pas le classement par défaut. Les liens et placements sponsorisés sont signalés.'],
+  ['MANOU est-il rémunéré ?', 'MANOU peut percevoir une commission d’affiliation lorsque vous achetez via un lien partenaire. Elle n’influence pas le classement par défaut. Les liens et placements sponsorisés sont signalés.'],
   ['Comment fonctionnent les alertes de prix ?', 'Vous définissez un prix cible. Dès qu’une offre vérifiée, disponible et non expirée passe sous ce seuil, vous recevez une notification dans votre centre de notifications (et un email lorsque l’envoi d’emails est configuré).'],
   ['Comment supprimer mon compte ?', 'Dans « Mon compte », section « Données personnelles » : vous pouvez exporter vos données et supprimer votre compte à tout moment.'],
 ];

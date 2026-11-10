@@ -9,7 +9,7 @@ export default async function promotions(ctx) {
   const tab = ctx.query.tab || 'jour';
   const st = { page: 1, ...Object.fromEntries(Object.entries(ctx.query).filter(([k]) => k !== 'tab')) };
   return {
-    title: 'Promotions et codes promo beauté | VELUNE', desc: 'Promotions classées selon l’historique des prix, avec dates de vérification, et codes promotionnels avec conditions.',
+    title: 'Promotions et codes promo beauté | MANOU', desc: 'Promotions classées selon l’historique des prix, avec dates de vérification, et codes promotionnels avec conditions.',
     html: html`<div class="container" style="padding-top:1.5rem"><div class="crumbs"><a href="/">Accueil</a> › Promotions</div><h1>Promotions</h1>
       <div class="notice demo">Toutes les offres et tous les codes sont des <strong>données de démonstration</strong>. En production, une offre expirée ou non vérifiée ne serait jamais présentée comme active.</div>
       <nav class="tabs" aria-label="Catégories de promotions">${TABS.map(([id, l]) => html`<a href="/promotions?tab=${id}" ${tab === id ? raw('aria-current="true"') : ''}>${l}</a>`)}</nav>
