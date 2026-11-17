@@ -8,7 +8,7 @@ import { HttpError, bad, forbidden, notFound, intId, str, oneOf, now, hashToken 
 import { rateLimit } from './ratelimit.js';
 import { createAuth } from './auth.js';
 import { createServices } from './services.js';
-import { createCatalog } from './catalog.js';
+import { createCatalog, demoWav } from './catalog.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const openapi = JSON.parse(readFileSync(path.join(here, 'openapi.json'), 'utf8'));
@@ -76,6 +76,8 @@ export function createApp(db, { catalog = createCatalog(db), publish = () => {},
   app.get('/config', (req, res) => res.json({ dev_mode: config.devMode,
     social: { google: config.googleClientIds.length > 0, facebook: !!(config.facebookAppId && config.facebookAppSecret) },
     social_demo: !config.isProd }));
+  /** Synthesised 8 s melody used as the preview of the local demo catalog (works offline, no third party). */
+  app.get('/preview/:n.wav', (req, res) => { res.set('Cache-Control', 'public, max-age=86400').type('audio/wav').send(demoWav(intId(req.params.n, 'n'))); });
   app.get('/health', (req, res) => res.json({ ok: true }));
   app.get('/docs.json', (req, res) => res.json(openapi));
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapi));
@@ -171,14 +173,15 @@ export function createApp(db, { catalog = createCatalog(db), publish = () => {},
   /* ----- EVENTS ----- */
   const ev = (req) => svc.getEvent(intId(req.params.id));
   const visibleEvent = (req) => { const e = ev(req); if (!svc.canSeeEvent(e, req.user.id)) throw notFound('Event not found'); return e; };
-  app.get('/events', requireAuth, (req, res) => res.json(svc.listEvents(req.user.id)));
+  app.get('/events', requireAuth, (req, res) => res.json(svc.listEvents(req.user.id, String(req.query.q || '').slice(0, 60))));
   app.post('/events', requireAuth, (req, res) => res.status(201).json(svc.eventState(svc.createEvent(req.user.id, req.body || {}), req.user.id)));
-  app.get('/events/:id', requireAuth, (req, res) => { const e = visibleEvent(req); res.json({ ...svc.eventState(e, req.user.id), can_vote: svc.canVoteEvent(e, req.user.id, pos(req)) }); });
+  const invited = (table, col, id) => all(`SELECT u.id, u.display_name FROM ${table} i JOIN users u ON u.id=i.user_id WHERE i.${col}=?`, id);
+  app.get('/events/:id', requireAuth, (req, res) => { const e = visibleEvent(req); res.json({ ...svc.eventState(e, req.user.id), owner_name: q('SELECT display_name n FROM users WHERE id=?', e.owner_id).n, can_vote: svc.canVoteEvent(e, req.user.id, pos(req)), ...(e.owner_id === req.user.id ? { invited: invited('event_invites', 'event_id', e.id) } : {}) }); });
   app.patch('/events/:id', requireAuth, (req, res) => {
     const e = ev(req); if (e.owner_id !== req.user.id) throw forbidden('Only the owner can edit the event');
     const b = req.body || {};
     const v = oneOf(b.visibility, 'visibility', ['public', 'private'], e.visibility), l = oneOf(b.license, 'license', ['open', 'invited', 'geo_time'], e.license);
-    run('UPDATE events SET visibility=?, license=?, name=?, lat=?, lng=?, radius_m=?, start_at=?, end_at=? WHERE id=?', v, l,
+    run('UPDATE events SET description=?, visibility=?, license=?, name=?, lat=?, lng=?, radius_m=?, start_at=?, end_at=? WHERE id=?', b.description !== undefined ? String(b.description).slice(0, 500) : e.description, v, l,
       b.name !== undefined ? str(b.name, 'name', { max: 100 }) : e.name, b.lat ?? e.lat, b.lng ?? e.lng, b.radius_m ?? e.radius_m, b.start_at ?? e.start_at, b.end_at ?? e.end_at, e.id);
     res.json(svc.eventState(svc.getEvent(e.id), req.user.id));
   });
@@ -197,9 +200,9 @@ export function createApp(db, { catalog = createCatalog(db), publish = () => {},
   /* ----- PLAYLISTS ----- */
   const pl = (req) => svc.getPlaylist(intId(req.params.id));
   const visiblePl = (req) => { const p = pl(req); if (!svc.canSeePlaylist(p, req.user.id)) throw notFound('Playlist not found'); return p; };
-  app.get('/playlists', requireAuth, (req, res) => res.json(svc.listPlaylists(req.user.id)));
+  app.get('/playlists', requireAuth, (req, res) => res.json(svc.listPlaylists(req.user.id, String(req.query.q || '').slice(0, 60))));
   app.post('/playlists', requireAuth, (req, res) => res.status(201).json(svc.playlistState(svc.createPlaylist(req.user.id, req.body || {}))));
-  app.get('/playlists/:id', requireAuth, (req, res) => { const p = visiblePl(req); res.json({ ...svc.playlistState(p), can_edit: svc.canEditPlaylist(p, req.user.id) }); });
+  app.get('/playlists/:id', requireAuth, (req, res) => { const p = visiblePl(req); res.json({ ...svc.playlistState(p), owner_name: q('SELECT display_name n FROM users WHERE id=?', p.owner_id).n, can_edit: svc.canEditPlaylist(p, req.user.id), ...(p.owner_id === req.user.id ? { invited: invited('playlist_invites', 'playlist_id', p.id) } : {}) }); });
   app.patch('/playlists/:id', requireAuth, (req, res) => {
     const p = pl(req); if (p.owner_id !== req.user.id) throw forbidden('Only the owner can edit settings');
     const b = req.body || {};
@@ -215,9 +218,10 @@ export function createApp(db, { catalog = createCatalog(db), publish = () => {},
   app.post('/playlists/:id/tracks/:entryId/move', requireAuth, wrap(async (req, res) => res.json(await svc.editPlaylist(pl(req), req.user.id, { type: 'move', entryId: intId(req.params.entryId, 'entryId'), toIndex: req.body?.toIndex, expectedVersion: req.body?.expectedVersion }))));
 
   /* ----- DEVICES & DELEGATION ----- */
+  const summary = (json) => { const st = JSON.parse(json || '{}'); const cur = st.queue?.[st.index ?? 0]; return { playing: !!st.playing, volume: st.volume ?? 50, track: cur ? { title: cur.title, artist: cur.artist } : null }; };
   app.get('/devices', requireAuth, (req, res) => res.json({
-    mine: all('SELECT id,name,platform,model,app_version FROM devices WHERE user_id=? ORDER BY id', req.user.id).map((d) => ({ ...d, delegates: all('SELECT f.friend_id id, u.display_name FROM device_delegates f JOIN users u ON u.id=f.friend_id WHERE f.device_id=?', d.id) })),
-    delegated_to_me: all(`SELECT d.id,d.name,d.platform,d.model, u.id owner_id, u.display_name owner_name FROM device_delegates x JOIN devices d ON d.id=x.device_id JOIN users u ON u.id=d.user_id WHERE x.friend_id=?`, req.user.id),
+    mine: all('SELECT id,name,platform,model,app_version,state FROM devices WHERE user_id=? ORDER BY id', req.user.id).map(({ state, ...d }) => ({ ...d, player: summary(state), delegates: all('SELECT f.friend_id id, u.display_name FROM device_delegates f JOIN users u ON u.id=f.friend_id WHERE f.device_id=?', d.id) })),
+    delegated_to_me: all(`SELECT d.id,d.name,d.platform,d.model,d.state, u.id owner_id, u.display_name owner_name FROM device_delegates x JOIN devices d ON d.id=x.device_id JOIN users u ON u.id=d.user_id WHERE x.friend_id=?`, req.user.id).map(({ state, ...d }) => ({ ...d, player: summary(state) })),
   }));
   app.post('/devices', requireAuth, (req, res) => {
     const b = req.body || {}, h = req.headers;

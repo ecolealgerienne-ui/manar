@@ -17,7 +17,7 @@ music-room/
 cd music-room
 npm run setup      # installs backend + mobile dependencies
 npm start          # API on http://localhost:4000  (Swagger: /docs)
-npm test           # 27 tests
+npm test           # 29 tests
 npm run mobile     # 2nd terminal: Expo dev server, press w (web) / scan QR with Expo Go
 ```
 Linux/macOS: `make start`, `make test`, `make bench`, `make mobile` do the same.
@@ -25,22 +25,35 @@ Linux/macOS: `make start`, `make test`, `make bench`, `make mobile` do the same.
 **Dev mode** (no SMTP and not production): there is no mail server, so the API returns the verification token / reset code in its response and the app shows a *Verify my e-mail* button. Social login shows **demo buttons** (token `dev:<name>`) until real Google/Facebook IDs are configured; these two shortcuts are disabled in production or as soon as SMTP / provider credentials are set.
 On a phone, set the server address (your PC's LAN IP, e.g. `http://192.168.1.10:4000`, never `localhost`) at the bottom of the login screen.
 
-## Subject coverage
-| Subject | Where |
-|---|---|
-| V.1 Account e-mail/password or Google/Facebook, linking, profile public / friends / private / music prefs, mail validation, password reset | `backend/src/auth.js`, `app.js` (`/auth/*`, `/me`, `/users`), mobile `AuthScreen`, `ProfileScreen` |
-| V.2.1 **Music Track Vote** (public/private events, licences *open / invited / place+time*, votes reorder the queue, concurrency) | `services.js` (events section), `/events/*` |
-| V.2.2 **Music Control Delegation** (per-device, per-friend licence) | `services.js` (devices), `/devices/*` |
-| V.2.3 **Music Playlist Editor** (public/private, open/invited editing, real-time, concurrent moves) | `services.js` (playlists), `/playlists/*` |
-| All three services are implemented (2 required) | |
-| V.3 Server = truth; all data in the back-end | SQLite DB |
-| V.4 REST + JSON API documented with Swagger/OpenAPI | `/docs`, `backend/src/openapi.json` |
-| V.5 App is only a remote control, configurable back-end URL, Google/Facebook sign-in | `mobile/src/api.js`, `social.js` |
-| V.6 Securing + logs (platform / device / app version) | `docs/SECURITY.md`, logging middleware in `app.js`, `logs` table |
-| V.7 Ramp-up | `backend/bench.js`, `docs/PERFORMANCE.md` |
-| V.8 Agility, per-layer tests, CI, no secrets in git | `backend/test/*`, `.github/workflows/music-room.yml`, `.env` ignored |
+## Subject coverage (mandatory part, checked point by point)
+| # | Requirement of the subject | Status | Where / how to check |
+|---|---|---|---|
+| IV.1 | Free back-end technology, justified; no foreign library committed; dependencies downloaded automatically (Makefile or similar) | ✅ | "Technical choices" below; `.gitignore` excludes `node_modules`; `make install` or `npm run setup` |
+| IV.2 | Mobile app (Android **or** iOS), technology of our choice | ✅ | `mobile/` Expo / React Native (Android + iOS, also runs on web) |
+| V.1 | First launch: create an account with e-mail/password **or** Facebook/Google | ✅ | `AuthScreen`; `POST /auth/register`, `POST /auth/social` |
+| V.1 | Link a Facebook/Google account to an existing account | ✅ | Profile → Linked accounts; `POST /me/social/:provider` |
+| V.1 | Profile: public info, friends-only info, private info, music preferences (view + update) | ✅ | Profile screen; `PATCH /me`; visibility enforced in `GET /users/:id` (tests) |
+| V.1 | Mail/password account: **mail validation** demanded, and invited to change a forgotten password | ✅ | login refused with `EMAIL_NOT_VERIFIED`; `/auth/forgot-password` + `/auth/reset-password` |
+| V.2 | At least 2 of the 3 services | ✅ **all 3** | below |
+| V.2.1 | **Track Vote**: anyone suggests/votes the next track; more votes ⇒ higher in the list, played earlier | ✅ | `Events` tab; queue sorted `votes DESC, age ASC`; owner "Play next" plays the top track |
+| V.2.1 | Visibility Public/Private (default public; private = invited only can find and vote) | ✅ | `EventForm`, `canSeeEvent` (private ⇒ 404 for others) |
+| V.2.1 | Licence: default everyone; invited only; **place + time window** (e.g. 4–6 PM) | ✅ | `EventForm` (HH:MM window, radius, GPS position), `canVoteEvent` |
+| V.2.1 | Competition handling (several people voting different/same tracks) | ✅ | PK `(track,user)`, `UNIQUE(event,track)`, `BEGIN IMMEDIATE`; test with 40 parallel votes |
+| V.2.2 | **Control Delegation**: licence specific to **each device** of the account; give control to **different friends** | ✅ | `Devices` tab; `PUT /devices/:id/delegates/:friendId` (friends only); remote screen; the delegate can also play the sound on their own device |
+| V.2.3 | **Playlist Editor**: real-time multi-user edition; public/private (default public); editing licence open/invited (default open) | ✅ | `Playlists` tab; WebSocket push; `canEditPlaylist` |
+| V.2.3 | Competition handling (several people moving tracks) | ✅ | server-side operations (entry id + target index) in one transaction; tests with 8 parallel moves |
+| V.3 | All service data stored on the back-end (the truth) | ✅ | SQLite; app keeps only URL + token locally |
+| V.4 | REST API documented (methods, inputs, outputs), JSON | ✅ | Swagger UI `/docs`, `/docs.json` |
+| V.5 | Mobile app = remote control only; back-end address configurable | ✅ | `mobile/src/api.js`; address field on the login screen and in Profile |
+| V.5 | Facebook/Google authentication in the app | ✅ (needs your client IDs for the real flow) | `mobile/src/social.js`; server verifies tokens with the provider. Without IDs, a clearly-labelled dev-only demo login is offered |
+| V.6 | A user sees their data but not others'; protections against bruteforce, session theft…; other hazards identified with practical protections | ✅ | `docs/SECURITY.md`; isolation tests |
+| V.6 | Every action of the app logged on the back-end with platform, device, app version | ✅ | middleware in `app.js` → table `logs` + `logs/access.log`; the app sends `X-Platform`, `X-Device-Model`, `X-App-Version` and screen views via `POST /logs` |
+| V.7 | Measure the load (AB/Gatling/…); justify the number of simultaneous users; give the server specs | ✅ | `backend/bench.js` (autocannon), `docs/PERFORMANCE.md` |
+| V.8 | Agility/quality: specific one-off tests per layer; CI | ✅ | `backend/test/units.test.js` (business rules), `api.test.js` (HTTP + WebSocket + security + concurrency), `.github/workflows/music-room.yml` |
+| V.8 | No credentials in git, `.env` ignored | ✅ | `.gitignore`, `.env.example` only; CI fails if a `.env` is tracked |
+| II | AI instructions: responsible, transparent use | ✅ | `docs/AI-USAGE.md` |
 
-Bonus (not claimed — the subject only evaluates bonuses if the mandatory part is perfect): the Expo app runs on web (`make mobile` → `w`), which gives a first responsive web client.
+No bonus is claimed (the subject evaluates bonuses only if the mandatory part is perfect).
 
 ## Technical choices (and why)
 | Choice | Justification | Trade-off |

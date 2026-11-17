@@ -3,7 +3,7 @@
  "info": {
   "title": "Music Room API",
   "version": "1.0.0",
-  "description": "REST/JSON API. Real time: WebSocket /ws — send {\"action\":\"auth\",\"token\"} then {\"action\":\"subscribe\",\"channel\":\"event:1|playlist:1|device:1\"}; server pushes {channel,type:\"state\",data}. Mobile apps should send headers X-Platform, X-Device-Model, X-App-Version (logged server side)."
+  "description": "REST/JSON API. Real time: WebSocket /ws \u2014 send {\"action\":\"auth\",\"token\"} then {\"action\":\"subscribe\",\"channel\":\"event:1|playlist:1|device:1\"}; server pushes {channel,type:\"state\",data}. Mobile apps should send headers X-Platform, X-Device-Model, X-App-Version (logged server side)."
  },
  "components": {
   "securitySchemes": {
@@ -822,7 +822,17 @@
      "401": {
       "description": "Unauthenticated"
      }
-    }
+    },
+    "parameters": [
+     {
+      "name": "q",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      },
+      "description": "filter by name"
+     }
+    ]
    },
    "post": {
     "tags": [
@@ -1110,7 +1120,7 @@
     "tags": [
      "Track Vote"
     ],
-    "summary": "Suggest a track (adds it + your vote; duplicate => just a vote). Body may contain position {lat,lng} for geo_time licence",
+    "summary": "Suggest a track (adds it + your vote; duplicate => just a vote). Body may contain position {lat,lng} for geo_time licence Response: event state + entry_id (the vote target id).",
     "security": [
      {
       "bearer": []
@@ -1308,7 +1318,17 @@
      "401": {
       "description": "Unauthenticated"
      }
-    }
+    },
+    "parameters": [
+     {
+      "name": "q",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      },
+      "description": "filter by name"
+     }
+    ]
    },
    "post": {
     "tags": [
@@ -2045,6 +2065,42 @@
      },
      "401": {
       "description": "Unauthenticated"
+     }
+    }
+   }
+  },
+  "/config": {
+   "get": {
+    "tags": [
+     "Meta"
+    ],
+    "summary": "Public server info: dev_mode, configured social providers",
+    "responses": {
+     "200": {
+      "description": "OK"
+     }
+    }
+   }
+  },
+  "/preview/{n}.wav": {
+   "get": {
+    "tags": [
+     "Music"
+    ],
+    "summary": "Synthesised preview of a local demo track",
+    "parameters": [
+     {
+      "name": "n",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "audio/wav"
      }
     }
    }

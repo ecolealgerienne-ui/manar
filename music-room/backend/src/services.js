@@ -70,10 +70,27 @@ export function createServices(db, catalog, publish = () => {}) {
     return getEvent(Number(r.lastInsertRowid));
   }
 
-  function listEvents(uid) {
-    return all(`SELECT e.id,e.name,e.description,e.visibility,e.license,e.owner_id,e.start_at,e.end_at FROM events e
-      WHERE e.visibility='public' OR e.owner_id=? OR EXISTS(SELECT 1 FROM event_invites i WHERE i.event_id=e.id AND i.user_id=?)
-      ORDER BY e.created_at DESC LIMIT 200`, uid, uid);
+  /** Adds up to 4 track covers/titles to each row (for the mosaics of the mobile UI). */
+  function withCovers(rows, sql, idKey) {
+    if (!rows.length) return rows;
+    const ids = rows.map((r) => r.id);
+    const by = new Map();
+    for (const c of all(sql.replace('?', ids.map(() => '?').join(',')), ...ids)) {
+      const a = by.get(c.rid) || []; if (a.length < 4) a.push({ title: c.title, artist: c.artist, cover: c.cover }); by.set(c.rid, a);
+    }
+    return rows.map((r) => ({ ...r, covers: by.get(r.id) || [] }));
+  }
+  function listEvents(uid, search = '') {
+    const like = `%${String(search).replace(/[%_\\]/g, '')}%`;
+    const rows = all(`SELECT e.id,e.name,e.description,e.visibility,e.license,e.owner_id,e.start_at,e.end_at,e.lat,e.lng,e.radius_m,u.display_name AS owner_name,
+        (SELECT COUNT(*) FROM event_tracks et WHERE et.event_id=e.id AND et.status='queued') AS queue_count,
+        (SELECT COUNT(*) FROM event_votes v JOIN event_tracks et ON et.id=v.event_track_id WHERE et.event_id=e.id) AS votes_count,
+        (SELECT t.title FROM event_tracks et JOIN tracks t ON t.id=et.track_id WHERE et.event_id=e.id AND et.status='playing' LIMIT 1) AS now_playing
+      FROM events e JOIN users u ON u.id=e.owner_id
+      WHERE (e.visibility='public' OR e.owner_id=? OR EXISTS(SELECT 1 FROM event_invites i WHERE i.event_id=e.id AND i.user_id=?)) AND e.name LIKE ?
+      ORDER BY e.created_at DESC LIMIT 200`, uid, uid, like);
+    return withCovers(rows, `SELECT et.event_id AS rid, t.title, t.artist, t.cover FROM event_tracks et JOIN tracks t ON t.id=et.track_id
+      WHERE et.event_id IN (?) AND et.status IN ('queued','playing') ORDER BY et.id`, 'id');
   }
 
   /** Suggest = add to the queue with the suggester's vote. Same track twice => just a vote (no duplicate). */
@@ -157,9 +174,17 @@ export function createServices(db, catalog, publish = () => {}) {
     const r = run('INSERT INTO playlists (owner_id,name,visibility,edit_license,created_at) VALUES (?,?,?,?,?)', uid, b.name.trim(), visibility, edit, now());
     return getPlaylist(Number(r.lastInsertRowid));
   }
-  const listPlaylists = (uid) => all(`SELECT p.id,p.name,p.visibility,p.edit_license,p.owner_id,p.version FROM playlists p
-    WHERE p.visibility='public' OR p.owner_id=? OR EXISTS(SELECT 1 FROM playlist_invites i WHERE i.playlist_id=p.id AND i.user_id=?)
-    ORDER BY p.created_at DESC LIMIT 200`, uid, uid);
+  function listPlaylists(uid, search = '') {
+    const like = `%${String(search).replace(/[%_\\]/g, '')}%`;
+    const rows = all(`SELECT p.id,p.name,p.visibility,p.edit_license,p.owner_id,p.version,u.display_name AS owner_name,
+        (SELECT COUNT(*) FROM playlist_tracks pt WHERE pt.playlist_id=p.id) AS track_count,
+        (SELECT COUNT(*) FROM playlist_invites i WHERE i.playlist_id=p.id) AS collaborators
+      FROM playlists p JOIN users u ON u.id=p.owner_id
+      WHERE (p.visibility='public' OR p.owner_id=? OR EXISTS(SELECT 1 FROM playlist_invites i WHERE i.playlist_id=p.id AND i.user_id=?)) AND p.name LIKE ?
+      ORDER BY p.created_at DESC LIMIT 200`, uid, uid, like);
+    return withCovers(rows, `SELECT pt.playlist_id AS rid, t.title, t.artist, t.cover FROM playlist_tracks pt JOIN tracks t ON t.id=pt.track_id
+      WHERE pt.playlist_id IN (?) ORDER BY pt.position`, 'id');
+  }
 
   /**
    * Operation-based editing (add / remove / move). Each op is applied atomically on the server's CURRENT

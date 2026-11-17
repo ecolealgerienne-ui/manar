@@ -236,3 +236,34 @@ test('dev mode: token handed back, demo social login works only without credenti
   const dup = await c('POST', '/auth/register', { body: { email: 'devmode@test.io', password: 'Passw0rd!x', display_name: 'Dev' } });
   assert.equal(dup.body.dev_verify_token, undefined, 'existing e-mail never gets a token');
 });
+
+test('enriched lists (covers, counts), name filter, local audio preview, device summary', async () => {
+  const o = await app.user('rich');
+  const e = (await c('POST', '/events', { token: o.token, body: { name: 'Zebra night' } })).body;
+  await c('POST', `/events/${e.id}/tracks`, { token: o.token, body: { trackId: 'local:4' } });
+  const list = (await c('GET', '/events?q=zebra', { token: o.token })).body;
+  assert.equal(list.length, 1); assert.equal(list[0].queue_count, 1); assert.equal(list[0].votes_count, 1);
+  assert.equal(list[0].owner_name, 'rich'); assert.equal(list[0].covers[0].title, 'Bohemian Rhapsody');
+  const p = (await c('POST', '/playlists', { token: o.token, body: { name: 'Yak' } })).body;
+  await c('POST', `/playlists/${p.id}/tracks`, { token: o.token, body: { trackId: 'local:1' } });
+  assert.equal((await c('GET', '/playlists?q=yak', { token: o.token })).body[0].track_count, 1);
+  const wav = await fetch(`${app.base}/preview/3.wav`);
+  assert.equal(wav.headers.get('content-type'), 'audio/wav');
+  assert.ok((await wav.arrayBuffer()).byteLength > 100000);
+  const d = (await c('POST', '/devices', { token: o.token, body: { name: 'Box' } })).body;
+  await c('POST', `/playlists/${p.id}/tracks`, { token: o.token, body: { trackId: 'local:2' } });
+  await c('POST', `/devices/${d.id}/commands`, { token: o.token, body: { command: 'load', playlistId: p.id } });
+  await c('POST', `/devices/${d.id}/commands`, { token: o.token, body: { command: 'play' } });
+  const mine = (await c('GET', '/devices', { token: o.token })).body.mine[0];
+  assert.equal(mine.player.playing, true); assert.equal(mine.player.track.title, 'Blinding Lights');
+});
+
+test('owner sees the invited list on events and playlists', async () => {
+  const o = await app.user('invo'), g = await app.user('invg');
+  const e = (await c('POST', '/events', { token: o.token, body: { name: 'I', visibility: 'private' } })).body;
+  const p = (await c('POST', '/playlists', { token: o.token, body: { name: 'I' } })).body;
+  await c('PUT', `/events/${e.id}/invites/${g.id}`, { token: o.token }); await c('PUT', `/playlists/${p.id}/invites/${g.id}`, { token: o.token });
+  assert.equal((await c('GET', `/events/${e.id}`, { token: o.token })).body.invited[0].id, g.id);
+  assert.equal((await c('GET', `/playlists/${p.id}`, { token: o.token })).body.invited[0].id, g.id);
+  assert.equal((await c('GET', `/events/${e.id}`, { token: g.token })).body.invited, undefined);
+});

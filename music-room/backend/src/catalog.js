@@ -13,7 +13,7 @@ const LOCAL = [
   ['Lose Yourself', 'Eminem'], ['Hey Ya!', 'Outkast'], ['Take Five', 'Dave Brubeck'],
   ['So What', 'Miles Davis'], ['Clair de Lune', 'Debussy'], ['Alors on danse', 'Stromae'],
   ['Papaoutai', 'Stromae'], ['Dernière danse', 'Indila'],
-].map(([title, artist], i) => ({ id: `local:${i + 1}`, title, artist, album: 'Demo', cover: '', preview_url: '', duration: 180 }));
+].map(([title, artist], i) => ({ id: `local:${i + 1}`, title, artist, album: 'Demo', cover: '', preview_url: `/preview/${i + 1}.wav`, duration: 8 }));
 
 export function createCatalog(db, { fetchImpl = globalThis.fetch, deezer = process.env.NODE_ENV !== 'test' } = {}) {
   const upsert = db.prepare(`INSERT INTO tracks (id,title,artist,album,cover,preview_url,duration) VALUES (?,?,?,?,?,?,?)
@@ -50,4 +50,28 @@ export function createCatalog(db, { fetchImpl = globalThis.fetch, deezer = proce
     throw new HttpError(404, 'TRACK_NOT_FOUND', 'Unknown track');
   }
   return { search, resolve };
+}
+
+/** Tiny synthesiser: a deterministic 8 s pentatonic melody per track number (16-bit mono WAV, 11.025 kHz). */
+const wavCache = new Map();
+export function demoWav(n) {
+  if (wavCache.has(n)) return wavCache.get(n);
+  const rate = 11025, notes = 16, per = Math.floor((rate * 8) / notes), pent = [0, 2, 4, 7, 9, 12, 14, 16];
+  const base = 196 * 2 ** ((n * 3 % 12) / 12), pcm = Buffer.alloc(per * notes * 2);
+  let seed = n * 7919;
+  for (let k = 0; k < notes; k++) {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    const f = base * 2 ** (pent[seed % pent.length] / 12);
+    for (let i = 0; i < per; i++) {
+      const env = Math.min(1, i / 200) * Math.exp(-3 * (i / per));
+      const v = Math.sin(2 * Math.PI * f * i / rate) * 0.6 + Math.sin(4 * Math.PI * f * i / rate) * 0.2;
+      pcm.writeInt16LE(Math.round(v * env * 9000), (k * per + i) * 2);
+    }
+  }
+  const h = Buffer.alloc(44);
+  h.write('RIFF', 0); h.writeUInt32LE(36 + pcm.length, 4); h.write('WAVEfmt ', 8); h.writeUInt32LE(16, 16); h.writeUInt16LE(1, 20); h.writeUInt16LE(1, 22);
+  h.writeUInt32LE(rate, 24); h.writeUInt32LE(rate * 2, 28); h.writeUInt16LE(2, 32); h.writeUInt16LE(16, 34); h.write('data', 36); h.writeUInt32LE(pcm.length, 40);
+  const out = Buffer.concat([h, pcm]);
+  wavCache.set(n, out);
+  return out;
 }
