@@ -1,0 +1,24 @@
+name: music-room
+on:
+  push: { paths: ['music-room/**'] }
+  pull_request: { paths: ['music-room/**'] }
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: music-room } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: make test
+      - name: No secret committed
+        run: "! git ls-files | grep -E '(^|/)\\.env$'"
+  mobile-syntax:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: music-room/mobile } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install
+      - run: npx expo export --platform web
