@@ -121,3 +121,18 @@ test('delegation is per device and only to friends', () => {
   assert.throws(() => svc.controlDevice(car, bob, { command: 'play' }), /no control/);
   assert.throws(() => svc.controlDevice(car, alice, { command: 'volume', value: 101 }), /0-100/);
 });
+
+test('queue order: among equal scores, the track that reached the score first stays first', async () => {
+  const { svc, alice, bob, carol } = setup();
+  const e = svc.createEvent(alice, { name: 'order' });
+  const a = await svc.suggestTrack(e, alice, 'local:1');
+  const b = await svc.suggestTrack(e, alice, 'local:2');
+  const wait = () => new Promise((r) => setTimeout(r, 3));
+  await wait(); svc.vote(e, bob, b, true);      // b reaches 2 first
+  await wait(); svc.vote(e, carol, a, true);    // a reaches 2 afterwards -> goes AFTER b
+  assert.deepEqual(svc.eventState(e, alice).queue.map((t) => t.id), [b, a]);
+  await wait(); svc.vote(e, bob, a, true);      // a gets 3 -> now first
+  assert.deepEqual(svc.eventState(e, alice).queue.map((t) => t.id), [a, b]);
+  svc.nextTrack(e, alice);
+  assert.equal(svc.eventState(e, alice).nowPlaying.id, a);
+});

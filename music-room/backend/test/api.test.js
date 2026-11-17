@@ -267,3 +267,14 @@ test('owner sees the invited list on events and playlists', async () => {
   assert.equal((await c('GET', `/playlists/${p.id}`, { token: o.token })).body.invited[0].id, g.id);
   assert.equal((await c('GET', `/events/${e.id}`, { token: g.token })).body.invited, undefined);
 });
+
+test('sessions: current one is flagged, others can be disconnected in one call', async () => {
+  const u = await app.user('sess');
+  const second = (await c('POST', '/auth/login', { body: { email: u.email, password: u.pw }, headers: { 'x-platform': 'android', 'x-device-model': 'Pixel 9' } })).body.token;
+  const list = (await c('GET', '/me/sessions', { token: second })).body;
+  assert.equal(list.length, 2); assert.equal(list.filter((s) => s.current).length, 1);
+  assert.equal(list.find((s) => s.current).device, 'Pixel 9');
+  assert.equal((await c('DELETE', '/me/sessions', { token: second })).body.revoked, 1);
+  assert.equal((await c('GET', '/me', { token: u.token })).status, 401);
+  assert.equal((await c('GET', '/me', { token: second })).status, 200);
+});

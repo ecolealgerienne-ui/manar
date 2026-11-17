@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { api, subscribe, logAction } from '../api';
 import { useAuth } from '../auth';
-import { Page, Grid, Section, Btn, IconBtn, Input, Chip, Badge, Live, Mosaic, Cover, Equalizer, EventCard, Empty, Loading, s, colors, guard, notify, grad, licenceLabel } from '../ui';
+import { confirmAction, Page, Grid, Section, Btn, IconBtn, Input, Chip, Badge, Live, Mosaic, Cover, Equalizer, EventCard, Empty, Loading, s, colors, guard, notify, grad, licenceLabel } from '../ui';
 import { TrackRow, TrackSearch, InvitePanel, EventForm } from '../parts';
 import { togglePreview, usePreviewId } from '../player';
 import { ScrollView } from 'react-native';
@@ -55,7 +55,7 @@ export function EventDetail({ route, navigation }) {
   useEffect(() => {
     logAction(`screen:Event:${id}`);
     (async () => { try { const e0 = await api('GET', `/events/${id}`); if (e0.license === 'geo_time') await getPos().catch(() => {}); } catch { /* shown by load */ } load(); })();
-    return subscribe(`event:${id}`, (d) => { setEv((o) => ({ ...(o || {}), ...d })); setFlash('Updated live'); setTimeout(() => setFlash(null), 1500); });
+    return subscribe(`event:${id}`, () => { load(); setFlash('Updated live'); setTimeout(() => setFlash(null), 1500); });
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
   const withPos = async () => (ev?.license === 'geo_time' ? (posRef.current || (await getPos())) : undefined);
   const merge = (d) => setEv((o) => ({ ...o, ...d }));
@@ -63,7 +63,7 @@ export function EventDetail({ route, navigation }) {
   const suggest = guard(async (t) => { merge(await api('POST', `/events/${id}/tracks`, { trackId: t.id, position: await withPos() })); notify('Added to the queue', t.title); });
   const next = guard(async () => merge(await api('POST', `/events/${id}/next`)));
   const save = async (b) => { merge(await api('PATCH', `/events/${id}`, b)); setEdit(false); await load(); };
-  const del = guard(async () => { await api('DELETE', `/events/${id}`); navigation.goBack(); });
+  const del = guard(async () => { if (!(await confirmAction('Delete this event?', `“${ev.name}”, its queue and all the votes will be permanently deleted. This cannot be undone.`, { confirmText: 'Delete event' }))) return; await api('DELETE', `/events/${id}`); navigation.goBack(); });
   const invite = guard(async (uid) => { await api('PUT', `/events/${id}/invites/${uid}`); load(); });
   const uninvite = guard(async (uid) => { await api('DELETE', `/events/${id}/invites/${uid}`); load(); });
   const prev = usePreviewId();
@@ -100,9 +100,11 @@ export function EventDetail({ route, navigation }) {
             {ev.nowPlaying ? <TrackRow t={{ ...ev.nowPlaying, id: ev.nowPlaying.track_id }} right={<Equalizer />} /> : <Empty icon="pause-circle" text="Nothing playing. The owner starts the best-voted track." />}
             {owner && <Btn icon="play-skip-forward" title="Play next track (most voted)" onPress={next} disabled={!ev.queue.length} />}
           </Section>
-          <Section title="Queue · most votes first" icon="trending-up">
+          <Section title="Queue" icon="trending-up">
+            <Text style={[s.dim, { marginBottom: 8 }]}>Most votes first. With the same score, the track that got there first stays first, so a new vote puts a track right after those already at that level.</Text>
             {ev.queue.length === 0 ? <Empty text="The queue is empty. Suggest a track!" /> : ev.queue.map((t, i) => (
-              <TrackRow key={t.id} t={t} index={i} right={<VoteButton t={t} onPress={() => vote(t)} disabled={!canVote} />} />))}
+              <View key={t.id}>{i === 0 && <View style={[s.row, { marginBottom: 4 }]}><Ionicons name="flash" size={14} color={colors.yellow} /><Text style={{ color: colors.yellow, fontWeight: '800', fontSize: 11, marginLeft: 4 }}>NEXT UP</Text></View>}
+                <TrackRow t={t} index={i} right={<VoteButton t={t} onPress={() => vote(t)} disabled={!canVote} />} /></View>))}
           </Section>
         </View>
         <View style={{ flex: 1, minWidth: 320, padding: 6 }}>

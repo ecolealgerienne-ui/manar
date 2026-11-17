@@ -19,6 +19,10 @@ export function createServices(db, catalog, publish = () => {}) {
   const canSeeEvent = (e, uid) => e.visibility === 'public' || isEventInvited(e, uid);
 
   /**
+   * Queue order (the same rule everywhere): most votes first; among equal scores the track that reached that score
+   * FIRST goes first (a new vote puts a track *after* the tracks already at the same level), then by id.
+   * The order is computed at read time from the votes: nothing stored that could drift.
+   *
    * Voting licence: open (default) / invited (only invited) / geo_time (inside radius AND time window).
    * `position` = {lat,lng} supplied by the client for the geo_time licence.
    */
@@ -48,7 +52,7 @@ export function createServices(db, catalog, publish = () => {}) {
         (SELECT COUNT(*) FROM event_votes v WHERE v.event_track_id = et.id) AS votes,
         EXISTS(SELECT 1 FROM event_votes v WHERE v.event_track_id = et.id AND v.user_id = ?) AS voted
       FROM event_tracks et JOIN tracks t ON t.id = et.track_id WHERE et.event_id = ? AND et.status IN ('queued','playing')
-      ORDER BY (et.status='playing') DESC, votes DESC, et.created_at ASC, et.id ASC`, uid ?? 0, e.id);
+      ORDER BY (et.status='playing') DESC, votes DESC, (SELECT COALESCE(MAX(v.created_at), et.created_at) FROM event_votes v WHERE v.event_track_id = et.id) ASC, et.id ASC`, uid ?? 0, e.id);
     const tracks = rows.map((r) => ({ ...r, voted: !!r.voted }));
     return { id: e.id, name: e.name, description: e.description, visibility: e.visibility, license: e.license,
       owner_id: e.owner_id, lat: e.lat, lng: e.lng, radius_m: e.radius_m, start_at: e.start_at, end_at: e.end_at,
@@ -136,7 +140,7 @@ export function createServices(db, catalog, publish = () => {}) {
     tx(db, () => {
       run("UPDATE event_tracks SET status='played', played_at=? WHERE event_id=? AND status='playing'", now(), e.id);
       const top = q(`SELECT et.id FROM event_tracks et WHERE et.event_id=? AND et.status='queued'
-        ORDER BY (SELECT COUNT(*) FROM event_votes v WHERE v.event_track_id=et.id) DESC, et.created_at ASC, et.id ASC LIMIT 1`, e.id);
+        ORDER BY (SELECT COUNT(*) FROM event_votes v WHERE v.event_track_id=et.id) DESC, (SELECT COALESCE(MAX(v.created_at), et.created_at) FROM event_votes v WHERE v.event_track_id=et.id) ASC, et.id ASC LIMIT 1`, e.id);
       if (top) run("UPDATE event_tracks SET status='playing', played_at=? WHERE id=?", now(), top.id);
     });
     pushEvent(e);

@@ -5,7 +5,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthProvider, useAuth } from './src/auth';
-import { Loading, colors } from './src/ui';
+import { View } from 'react-native';
+import { Loading, colors, DialogHost } from './src/ui';
 import AuthScreen from './src/screens/AuthScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import { EventsList, EventDetail } from './src/screens/EventsScreen';
@@ -44,5 +45,5 @@ function Root() {
     </Stack.Navigator>);
 }
 export default function App() {
-  return (<AuthProvider><NavigationContainer theme={theme}><StatusBar style="light" /><Root /></NavigationContainer></AuthProvider>);
+  return (<AuthProvider><View style={{ flex: 1 }}><NavigationContainer theme={theme}><StatusBar style="light" /><Root /></NavigationContainer><DialogHost /></View></AuthProvider>);
 }

@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Device from 'expo-device';
 import { api, subscribe, logAction } from '../api';
-import { Page, Grid, Section, Btn, IconBtn, Input, Chip, Badge, Avatar, Cover, Equalizer, Empty, Loading, s, colors, guard, notify, grad } from '../ui';
+import { confirmAction, Page, Grid, Section, Btn, IconBtn, Input, Chip, Badge, Avatar, Cover, Equalizer, Empty, Loading, s, colors, guard, notify, grad } from '../ui';
 import { applyDeviceState, stopDevice } from '../player';
 
 const ICON = { ios: 'phone-portrait', android: 'phone-portrait', web: 'laptop' };
@@ -15,7 +15,7 @@ export function DevicesList({ navigation }) {
   const load = guard(async () => { setD(await api('GET', '/devices')); setFriends((await api('GET', '/friends')).friends); });
   useFocusEffect(useCallback(() => { logAction('screen:Devices'); load(); }, []));  // eslint-disable-line react-hooks/exhaustive-deps
   const add = guard(async () => { await api('POST', '/devices', { name }); setName(''); load(); });
-  const del = guard(async (id) => { await api('DELETE', `/devices/${id}`); load(); });
+  const del = guard(async (x) => { if (!(await confirmAction('Remove this device?', `“${x.name}” will be removed and every friend loses control of it.`, { confirmText: 'Remove device' }))) return; await api('DELETE', `/devices/${x.id}`); load(); });
   const toggle = guard(async (dev, f, on) => { await api(on ? 'PUT' : 'DELETE', `/devices/${dev.id}/delegates/${f.id}`); load(); });
   if (!d) return <Loading />;
   const open = (x) => navigation.navigate('Remote', { id: x.id, name: x.name });
@@ -33,7 +33,7 @@ export function DevicesList({ navigation }) {
             <View key={x.id} style={[s.card, { padding: 0, overflow: 'hidden', marginBottom: 0 }]}>
               <LinearGradient colors={grad(`d${x.id}${x.name}`)} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: 14 }}>
                 <View style={s.between}><View style={s.row}><Ionicons name={ICON[x.platform] || 'musical-notes'} size={26} color="#fff" /><View style={{ marginLeft: 10 }}><Text style={{ color: '#fff', fontSize: 20, fontWeight: '900' }}>{x.name}</Text><Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11 }}>{[x.platform, x.model].filter(Boolean).join(' · ') || 'device'}</Text></View></View>
-                  <IconBtn name="trash" size={16} color={colors.red} onPress={() => del(x.id)} /></View>
+                  <IconBtn name="trash" size={16} color={colors.red} onPress={() => del(x)} /></View>
                 <Now x={x} />
               </LinearGradient>
               <View style={{ padding: 14 }}>

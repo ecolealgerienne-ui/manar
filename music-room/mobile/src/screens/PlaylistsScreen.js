@@ -4,7 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { api, subscribe, logAction } from '../api';
 import { useAuth } from '../auth';
-import { Page, Grid, Section, Btn, IconBtn, Input, Chip, Badge, Seg, Live, Mosaic, PlaylistCard, Empty, Loading, s, colors, guard, grad } from '../ui';
+import { confirmAction, Page, Grid, Section, Btn, IconBtn, Input, Chip, Badge, Seg, Live, Mosaic, PlaylistCard, Empty, Loading, s, colors, guard, grad } from '../ui';
 import { TrackRow, TrackSearch, InvitePanel } from '../parts';
 
 export function PlaylistsList({ navigation }) {
@@ -48,12 +48,12 @@ export function PlaylistDetail({ route, navigation }) {
   const apply = (p) => setPl((o) => ({ ...o, ...p }));
   // The server applies each operation on its CURRENT state (entry id + target index) so concurrent edits never overwrite each other.
   const move = guard(async (t, to) => apply(await api('POST', `/playlists/${id}/tracks/${t.id}/move`, { toIndex: to })));
-  const remove = guard(async (t) => apply(await api('DELETE', `/playlists/${id}/tracks/${t.id}`)));
+  const remove = guard(async (t) => { if (!(await confirmAction('Remove this track?', `“${t.title}” will be removed from the playlist for everybody.`, { confirmText: 'Remove' }))) return; apply(await api('DELETE', `/playlists/${id}/tracks/${t.id}`)); });
   const add = guard(async (t) => apply(await api('POST', `/playlists/${id}/tracks`, { trackId: t.id })));
   const settings = guard(async (k, v) => apply(await api('PATCH', `/playlists/${id}`, { [k]: v })));
   const invite = guard(async (uid) => { await api('PUT', `/playlists/${id}/invites/${uid}`); load(); });
   const uninvite = guard(async (uid) => { await api('DELETE', `/playlists/${id}/invites/${uid}`); load(); });
-  const del = guard(async () => { await api('DELETE', `/playlists/${id}`); navigation.goBack(); });
+  const del = guard(async () => { if (!(await confirmAction('Delete this playlist?', `“${pl.name}” and its ${pl.tracks.length} track(s) will be permanently deleted for everyone. This cannot be undone.`, { confirmText: 'Delete playlist' }))) return; await api('DELETE', `/playlists/${id}`); navigation.goBack(); });
   if (!pl) return <Loading />;
   const owner = pl.owner_id === user.id, canEdit = pl.can_edit !== false;
   const covers = pl.tracks.slice(0, 4);
@@ -65,7 +65,7 @@ export function PlaylistDetail({ route, navigation }) {
           <View style={{ flex: 1, marginLeft: 16, minWidth: 180 }}>
             <View style={s.row}><Live label="REAL TIME" />{flash && <Text style={{ color: '#fff', marginLeft: 8, fontSize: 11 }}>{flash}</Text>}</View>
             <Text style={{ color: '#fff', fontSize: 30, fontWeight: '900', marginTop: 6 }}>{pl.name}</Text>
-            <Text style={{ color: 'rgba(255,255,255,0.85)' }}>by {pl.owner_name} · {pl.tracks.length} tracks · v{pl.version}</Text>
+            <Text style={{ color: 'rgba(255,255,255,0.85)' }}>by {pl.owner_name} · {pl.tracks.length} track{pl.tracks.length === 1 ? '' : 's'}</Text>
             <View style={[s.row, { marginTop: 8, flexWrap: 'wrap' }]}>
               <Badge icon={pl.visibility === 'public' ? 'earth' : 'lock-closed'} text={pl.visibility === 'public' ? 'Public' : 'Private'} />
               <Badge icon={pl.edit_license === 'open' ? 'create' : 'mail'} text={pl.edit_license === 'open' ? 'Everyone edits' : 'Invited edit'} />

@@ -117,7 +117,8 @@ export function createApp(db, { catalog = createCatalog(db), publish = () => {},
   app.post('/me/password', requireAuth, authRL, wrap(async (req, res) => { await auth.changePassword(req.user, req.body?.current, req.body?.next); res.json({ ok: true }); }));
   app.post('/me/social/:provider', requireAuth, authRL, wrap(async (req, res) => { await auth.linkSocial(req.user, oneOf(req.params.provider, 'provider', ['google', 'facebook']), req.body?.token); res.json(me(req.user)); }));
   app.delete('/me/social/:provider', requireAuth, (req, res) => { auth.unlinkSocial(req.user, oneOf(req.params.provider, 'provider', ['google', 'facebook'])); res.json({ ok: true }); });
-  app.get('/me/sessions', requireAuth, (req, res) => res.json(all('SELECT id,created_at,expires_at,ip,platform,device FROM sessions WHERE user_id=? ORDER BY created_at DESC', req.user.id)));
+  app.get('/me/sessions', requireAuth, (req, res) => res.json(all('SELECT id,created_at,expires_at,ip,platform,device,(id=?) AS current FROM sessions WHERE user_id=? ORDER BY created_at DESC', req.user.sid, req.user.id).map((r) => ({ ...r, current: !!r.current }))));
+  app.delete('/me/sessions', requireAuth, (req, res) => { const r = run('DELETE FROM sessions WHERE user_id=? AND id<>?', req.user.id, req.user.sid); res.json({ revoked: r.changes }); });
   app.delete('/me/sessions/:id', requireAuth, (req, res) => { run('DELETE FROM sessions WHERE id=? AND user_id=?', intId(req.params.id), req.user.id); res.json({ ok: true }); });
 
   /** Profile of someone else: public part always, friends part for friends only, private never. */

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Platform, ScrollView, Image, Animated, useWindowDimensions, RefreshControl } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Modal, ScrollView, Image, Animated, useWindowDimensions, RefreshControl } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { state as apiState } from './api';
@@ -69,8 +69,46 @@ export const Input = ({ icon, ...p }) => (
     <TextInput placeholderTextColor={colors.dim} autoCapitalize="none" {...p} style={[{ flex: 1, color: colors.text, paddingVertical: 12, outlineStyle: 'none' }, p.style]} />
   </View>);
 export const Loading = () => <ActivityIndicator color={colors.accent} size="large" style={{ margin: 30 }} />;
-export const notify = (title, msg) => (Platform.OS === 'web' ? window.alert(`${title}${msg ? `\n${msg}` : ''}`) : Alert.alert(title, msg));
-export const guard = (fn) => async (...a) => { try { return await fn(...a); } catch (e) { notify('Error', e.message); } };
+/* ---------- in-app dialogs and toasts (work identically on web and native; RN's Alert does not exist on web) ---------- */
+let host = null;
+/** Ask for confirmation before a destructive action. Resolves true/false. */
+export const confirmAction = (title, message, { confirmText = 'Confirm', danger = true } = {}) => (host ? host.confirm({ title, message, confirmText, danger }) : Promise.resolve(true));
+/** Non-blocking message at the bottom of the screen (type: 'success' | 'error' | 'info'). */
+export const notify = (title, message, type) => { host?.toast({ title, message, type: type || (title === 'Error' ? 'error' : 'success') }); };
+export const guard = (fn) => async (...a) => { try { return await fn(...a); } catch (e) { notify('Error', e.message, 'error'); } };
+
+export function DialogHost() {
+  const [dlg, setDlg] = useState(null), [toast, setToast] = useState(null), timer = useRef(null);
+  useEffect(() => {
+    host = {
+      confirm: (o) => new Promise((res) => setDlg({ ...o, res })),
+      toast: (o) => { setToast(o); clearTimeout(timer.current); timer.current = setTimeout(() => setToast(null), o.type === 'error' ? 5000 : 2800); },
+    };
+    return () => { host = null; clearTimeout(timer.current); };
+  }, []);
+  const close = (v) => { dlg?.res(v); setDlg(null); };
+  const tc = toast ? (toast.type === 'error' ? colors.red : toast.type === 'info' ? colors.cyan : colors.green) : colors.green;
+  return (<>
+    <Modal transparent visible={!!dlg} animationType="fade" onRequestClose={() => close(false)}>
+      <View style={{ flex: 1, backgroundColor: 'rgba(5,5,15,0.75)', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+        <View style={{ width: '100%', maxWidth: 420, backgroundColor: colors.surface, borderRadius: 22, padding: 22, borderWidth: 1, borderColor: colors.border }}>
+          <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: dlg?.danger ? 'rgba(248,113,113,0.18)' : 'rgba(139,92,246,0.2)', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+            <Ionicons name={dlg?.danger ? 'warning' : 'help-circle'} size={28} color={dlg?.danger ? colors.red : colors.accent} /></View>
+          <Text style={[s.h2, { marginBottom: 6 }]}>{dlg?.title}</Text>
+          {!!dlg?.message && <Text style={{ color: colors.dim, fontSize: 14, marginBottom: 18 }}>{dlg.message}</Text>}
+          <Btn title={dlg?.confirmText || 'Confirm'} color={dlg?.danger ? '#dc2626' : undefined} onPress={() => close(true)} />
+          <Btn alt title="Cancel" onPress={() => close(false)} style={{ marginBottom: 0 }} />
+        </View>
+      </View>
+    </Modal>
+    {toast && (
+      <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, bottom: 84, alignItems: 'center', paddingHorizontal: 16 }}>
+        <View style={{ maxWidth: 480, width: '100%', backgroundColor: colors.surface2, borderRadius: 16, padding: 14, flexDirection: 'row', alignItems: 'center', borderLeftWidth: 5, borderLeftColor: tc, borderWidth: 1, borderColor: colors.border }}>
+          <Ionicons name={toast.type === 'error' ? 'alert-circle' : 'checkmark-circle'} size={24} color={tc} style={{ marginRight: 10 }} />
+          <View style={{ flex: 1 }}><Text style={{ color: '#fff', fontWeight: '800' }}>{toast.title}</Text>{!!toast.message && <Text style={{ color: colors.dim, marginTop: 2 }}>{toast.message}</Text>}</View>
+        </View></View>)}
+  </>);
+}
 
 export const Badge = ({ icon, text, color = colors.accent }) => (
   <View style={[s.row, { backgroundColor: 'rgba(0,0,0,0.35)', borderRadius: 20, paddingHorizontal: 9, paddingVertical: 4, marginRight: 6, marginBottom: 4 }]}>

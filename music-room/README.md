@@ -17,7 +17,7 @@ music-room/
 cd music-room
 npm run setup      # installs backend + mobile dependencies
 npm start          # API on http://localhost:4000  (Swagger: /docs)
-npm test           # 29 tests
+npm test           # 31 tests
 npm run mobile     # 2nd terminal: Expo dev server, press w (web) / scan QR with Expo Go
 ```
 Linux/macOS: `make start`, `make test`, `make bench`, `make mobile` do the same.
@@ -35,7 +35,7 @@ On a phone, set the server address (your PC's LAN IP, e.g. `http://192.168.1.10:
 | V.1 | Profile: public info, friends-only info, private info, music preferences (view + update) | ✅ | Profile screen; `PATCH /me`; visibility enforced in `GET /users/:id` (tests) |
 | V.1 | Mail/password account: **mail validation** demanded, and invited to change a forgotten password | ✅ | login refused with `EMAIL_NOT_VERIFIED`; `/auth/forgot-password` + `/auth/reset-password` |
 | V.2 | At least 2 of the 3 services | ✅ **all 3** | below |
-| V.2.1 | **Track Vote**: anyone suggests/votes the next track; more votes ⇒ higher in the list, played earlier | ✅ | `Events` tab; queue sorted `votes DESC, age ASC`; owner "Play next" plays the top track |
+| V.2.1 | **Track Vote**: anyone suggests/votes the next track; more votes ⇒ higher in the list, played earlier | ✅ | `Events` tab; queue sorted `votes DESC`, then *who reached the score first*; owner "Play next" plays the top track |
 | V.2.1 | Visibility Public/Private (default public; private = invited only can find and vote) | ✅ | `EventForm`, `canSeeEvent` (private ⇒ 404 for others) |
 | V.2.1 | Licence: default everyone; invited only; **place + time window** (e.g. 4–6 PM) | ✅ | `EventForm` (HH:MM window, radius, GPS position), `canVoteEvent` |
 | V.2.1 | Competition handling (several people voting different/same tracks) | ✅ | PK `(track,user)`, `UNIQUE(event,track)`, `BEGIN IMMEDIATE`; test with 40 parallel votes |
@@ -43,7 +43,7 @@ On a phone, set the server address (your PC's LAN IP, e.g. `http://192.168.1.10:
 | V.2.3 | **Playlist Editor**: real-time multi-user edition; public/private (default public); editing licence open/invited (default open) | ✅ | `Playlists` tab; WebSocket push; `canEditPlaylist` |
 | V.2.3 | Competition handling (several people moving tracks) | ✅ | server-side operations (entry id + target index) in one transaction; tests with 8 parallel moves |
 | V.3 | All service data stored on the back-end (the truth) | ✅ | SQLite; app keeps only URL + token locally |
-| V.4 | REST API documented (methods, inputs, outputs), JSON | ✅ | Swagger UI `/docs`, `/docs.json` |
+| V.4 | REST API documented (methods, inputs, outputs), JSON | ✅ | Swagger UI `/docs`, `/docs.json`: every route with its inputs, its response schema (`components/schemas`) and its error codes |
 | V.5 | Mobile app = remote control only; back-end address configurable | ✅ | `mobile/src/api.js`; address field on the login screen and in Profile |
 | V.5 | Facebook/Google authentication in the app | ✅ (needs your client IDs for the real flow) | `mobile/src/social.js`; server verifies tokens with the provider. Without IDs, a clearly-labelled dev-only demo login is offered |
 | V.6 | A user sees their data but not others'; protections against bruteforce, session theft…; other hazards identified with practical protections | ✅ | `docs/SECURITY.md`; isolation tests |

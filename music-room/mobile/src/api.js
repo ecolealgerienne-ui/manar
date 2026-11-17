@@ -18,7 +18,14 @@ export async function setToken(t) { state.token = t; if (t) await AsyncStorage.s
 
 const APP_VERSION = Constants.expoConfig?.version || '1.0.0';
 // Sent on every call: the back-end logs platform, device and application version (subject V.6).
-const clientHeaders = () => ({ 'X-Platform': Platform.OS, 'X-Device-Model': Device.modelName || Device.deviceName || 'unknown', 'X-App-Version': APP_VERSION });
+const browserLabel = () => {
+  if (Platform.OS !== 'web' || typeof navigator === 'undefined') return null;
+  const ua = navigator.userAgent, b = /Edg\//.test(ua) ? 'Edge' : /Firefox\//.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : 'Browser';
+  const o = /Windows/.test(ua) ? 'Windows' : /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : /Mac/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : '';
+  return o ? `${b} on ${o}` : b;
+};
+export const deviceLabel = () => Device.modelName || Device.deviceName || browserLabel() || 'unknown';
+const clientHeaders = () => ({ 'X-Platform': Platform.OS, 'X-Device-Model': deviceLabel(), 'X-App-Version': APP_VERSION });
 
 export class ApiError extends Error { constructor(status, code, message) { super(message); this.status = status; this.code = code; } }
 

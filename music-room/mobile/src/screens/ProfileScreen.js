@@ -5,9 +5,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { api, setBaseUrl, state, logAction } from '../api';
 import { useAuth } from '../auth';
-import { Page, Grid, Section, Btn, Input, Chip, Badge, Avatar, Empty, Loading, s, colors, guard, notify } from '../ui';
+import { confirmAction, Page, Grid, Section, Btn, Input, Chip, Badge, Avatar, Empty, Loading, s, colors, guard, notify } from '../ui';
 import { useSocialLogin } from '../social';
 
+const sessionLabel = (x) => (x.device && x.device !== 'unknown' ? x.device : x.platform === 'web' ? 'Web browser' : x.platform || 'Unknown device');
+const ipLabel = (ip = '') => (/^(::1|127\.0\.0\.1|::ffff:127\.0\.0\.1)$/.test(ip) ? 'this computer (local)' : ip.replace('::ffff:', ''));
 const GENRES = ['Pop', 'Rock', 'Hip-hop', 'Electro', 'Jazz', 'Classical', 'Reggae', 'Metal', 'R&B', 'Raï', 'Latin', 'Soul'];
 
 export function ProfileScreen({ navigation }) {
@@ -26,10 +28,13 @@ export function ProfileScreen({ navigation }) {
   const search = guard(async () => setFound(await api('GET', `/users?q=${encodeURIComponent(q)}`)));
   const ask = guard(async (id) => { await api('POST', '/friends/requests', { userId: id }); notify('Request sent'); loadAll(); });
   const accept = guard(async (id) => { await api('POST', `/friends/requests/${id}/accept`); loadAll(); });
-  const unlink = guard(async (p) => { await api('DELETE', `/me/social/${p}`); await refresh(); });
+  const unlink = guard(async (p) => { if (!(await confirmAction(`Unlink ${p}?`, 'You will no longer be able to log in with this account.', { confirmText: 'Unlink' }))) return; await api('DELETE', `/me/social/${p}`); await refresh(); });
   const changePw = guard(async () => { await api('POST', '/me/password', pw); setPw({ current: '', next: '' }); notify('Password changed'); });
   const saveServer = guard(async () => { await setBaseUrl(server); notify('Saved', 'Server address updated'); });
-  const revoke = guard(async (id) => { await api('DELETE', `/me/sessions/${id}`); loadAll(); });
+  const revoke = guard(async (x) => { if (!(await confirmAction('Disconnect this device?', `${sessionLabel(x)} will be logged out immediately.`, { confirmText: 'Disconnect' }))) return; await api('DELETE', `/me/sessions/${x.id}`); loadAll(); });
+  const revokeOthers = guard(async () => { if (!(await confirmAction('Disconnect all other devices?', 'Every device except this one will be logged out. Do it if you think someone else has access to your account.', { confirmText: 'Disconnect all' }))) return; const r = await api('DELETE', '/me/sessions'); notify('Done', `${r.revoked} device(s) disconnected`); loadAll(); });
+  const removeFriend = guard(async (x) => { if (!(await confirmAction(`Remove ${x.display_name} from your friends?`, 'They will no longer see your friends-only information, and any device control you gave them is withdrawn.', { confirmText: 'Remove friend' }))) return; await api('DELETE', `/friends/${x.id}`); notify('Friend removed', x.display_name); loadAll(); });
+  const logout = guard(async () => { if (await confirmAction('Log out?', 'You will need to log in again on this device.', { confirmText: 'Log out', danger: false })) signOut(); });
   const real = cfg?.social || {};
   return (
     <Page onRefresh={loadAll}>
@@ -44,7 +49,7 @@ export function ProfileScreen({ navigation }) {
               {user.social.map((p) => <Badge key={p} icon="link" text={p} color={colors.cyan} />)}<Badge icon="people" text={`${fr.friends.length} friends`} />
             </View>
           </View>
-          <Btn alt small icon="log-out" title="Log out" onPress={signOut} />
+          <Btn alt small icon="log-out" title="Log out" onPress={logout} />
         </View>
       </LinearGradient>
 
@@ -80,7 +85,7 @@ export function ProfileScreen({ navigation }) {
             {fr.friends.length === 0 && fr.incoming.length === 0 && <Empty icon="people" text="No friends yet. Search people below." />}
             {fr.friends.map((x) => (
               <TouchableOpacity key={x.id} onPress={() => navigation.navigate('Person', { id: x.id })} style={[s.card, s.between, { padding: 10, marginBottom: 8 }]}>
-                <View style={s.row}><Avatar name={x.display_name} size={38} /><Text style={[s.h3, { marginLeft: 10 }]}>{x.display_name}</Text></View><Ionicons name="chevron-forward" size={18} color={colors.dim} /></TouchableOpacity>))}
+                <View style={s.row}><Avatar name={x.display_name} size={38} /><Text style={[s.h3, { marginLeft: 10 }]}>{x.display_name}</Text></View><View style={s.row}><Btn small alt icon="person-remove" color={colors.red} title="Remove" onPress={() => removeFriend(x)} /><Ionicons name="chevron-forward" size={18} color={colors.dim} style={{ marginLeft: 6 }} /></View></TouchableOpacity>))}
             {fr.outgoing.length > 0 && <Text style={s.dim}>Pending: {fr.outgoing.map((x) => x.display_name).join(', ')}</Text>}
             <View style={{ height: 10 }} />
             <Input icon="search" placeholder="Find people by name" value={q} onChangeText={setQ} onSubmitEditing={search} />
@@ -91,8 +96,13 @@ export function ProfileScreen({ navigation }) {
             <Input icon="key" placeholder="Current password" secureTextEntry value={pw.current} onChangeText={(current) => setPw({ ...pw, current })} />
             <Input icon="key" placeholder="New password (8+, letters & digits)" secureTextEntry value={pw.next} onChangeText={(next) => setPw({ ...pw, next })} />
             <Btn alt icon="refresh" title="Change password" onPress={changePw} /></View></Section>}
-          <Section title="Where I'm logged in" icon="shield">
-            {sessions.map((x) => (<View key={x.id} style={[s.card, s.between, { padding: 10, marginBottom: 6 }]}><View><Text style={s.text}>{x.platform || 'unknown'} · {x.device || 'device'}</Text><Text style={s.dim}>{new Date(x.created_at).toLocaleString()} · {x.ip}</Text></View><Btn small alt icon="close" title="Revoke" onPress={() => revoke(x.id)} /></View>))}
+          <Section title="Devices logged in to my account" icon="shield">
+            <Text style={[s.dim, { marginBottom: 8 }]}>If you see a device you don’t recognise, disconnect it: it is logged out at once. This protects you if a phone is lost or a session is stolen.</Text>
+            {sessions.map((x) => (<View key={x.id} style={[s.card, s.between, { padding: 10, marginBottom: 6, borderColor: x.current ? colors.green : colors.border }]}>
+              <View style={{ flex: 1, paddingRight: 8 }}><View style={s.row}><Ionicons name={x.platform === 'web' ? 'laptop' : 'phone-portrait'} size={16} color={colors.dim} /><Text style={[s.text, { marginLeft: 6 }]}>{sessionLabel(x)}</Text>{x.current && <Badge icon="checkmark-circle" text="This device" color={colors.green} />}</View>
+                <Text style={s.dim}>Logged in {new Date(x.created_at).toLocaleString()} · {ipLabel(x.ip)}</Text></View>
+              {!x.current && <Btn small alt icon="log-out" title="Disconnect" onPress={() => revoke(x)} />}</View>))}
+            {sessions.length > 1 && <Btn small alt icon="shield-half" title="Disconnect all other devices" onPress={revokeOthers} />}
           </Section>
           <Section title="Server" icon="server"><View style={s.card}><Input icon="globe" value={server} onChangeText={setServer} keyboardType="url" /><Btn alt icon="save" title="Save address" onPress={saveServer} /></View></Section>
         </View>
@@ -105,6 +115,7 @@ export function Person({ route }) {
   const [u, setU] = useState(null);
   useEffect(() => { logAction(`screen:Person:${id}`); api('GET', `/users/${id}`).then(setU).catch((e) => notify('Error', e.message)); }, [id]);
   const ask = guard(async () => { await api('POST', '/friends/requests', { userId: id }); notify('Request sent'); });
+  const remove = guard(async () => { if (!(await confirmAction(`Remove ${u.display_name} from your friends?`, 'They will no longer see your friends-only information, and any device control you gave them is withdrawn.', { confirmText: 'Remove friend' }))) return; await api('DELETE', `/friends/${id}`); setU({ ...u, is_friend: false, friends_info: undefined }); notify('Friend removed', u.display_name); });
   if (!u) return <Loading />;
   return (
     <Page>
@@ -115,6 +126,6 @@ export function Person({ route }) {
       <Section title="About" icon="earth"><View style={s.card}><Text style={s.text}>{u.public_info || 'No public information.'}</Text></View></Section>
       {u.is_friend && <Section title="Only visible to friends" icon="people"><View style={s.card}><Text style={s.text}>{u.friends_info || 'Nothing shared with friends.'}</Text></View></Section>}
       <Section title="Music tastes" icon="musical-notes"><View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>{(u.music_prefs || []).length ? u.music_prefs.map((g) => <Chip key={g} label={g} active />) : <Text style={s.dim}>Not specified.</Text>}</View></Section>
-      {!u.is_friend && <View style={{ marginTop: 16 }}><Btn icon="person-add" title="Add as friend" onPress={ask} /></View>}
+      <View style={{ marginTop: 16 }}>{u.is_friend ? <Btn alt icon="person-remove" color={colors.red} title="Remove from friends" onPress={remove} /> : <Btn icon="person-add" title="Add as friend" onPress={ask} />}</View>
     </Page>);
 }

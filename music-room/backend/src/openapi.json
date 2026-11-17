@@ -11,6 +11,622 @@
     "type": "http",
     "scheme": "bearer"
    }
+  },
+  "schemas": {
+   "Error": {
+    "type": "object",
+    "properties": {
+     "error": {
+      "type": "object",
+      "properties": {
+       "code": {
+        "type": "string"
+       },
+       "message": {
+        "type": "string"
+       }
+      }
+     }
+    },
+    "description": "All errors: {\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"...\"}} with the HTTP status 400/401/403/404/409/429/500"
+   },
+   "Track": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string",
+      "example": "deezer:3135556"
+     },
+     "title": {
+      "type": "string"
+     },
+     "artist": {
+      "type": "string"
+     },
+     "album": {
+      "type": "string"
+     },
+     "cover": {
+      "type": "string"
+     },
+     "preview_url": {
+      "type": "string"
+     },
+     "duration": {
+      "type": "integer"
+     }
+    }
+   },
+   "TokenResponse": {
+    "type": "object",
+    "properties": {
+     "token": {
+      "type": "string",
+      "description": "Bearer token to send in Authorization"
+     },
+     "user_id": {
+      "type": "integer"
+     }
+    }
+   },
+   "Message": {
+    "type": "object",
+    "properties": {
+     "message": {
+      "type": "string"
+     },
+     "dev_verify_token": {
+      "type": "string",
+      "description": "dev mode only (no SMTP, not production)"
+     },
+     "dev_reset_code": {
+      "type": "string"
+     }
+    }
+   },
+   "Profile": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "integer"
+     },
+     "email": {
+      "type": "string"
+     },
+     "email_verified": {
+      "type": "boolean"
+     },
+     "display_name": {
+      "type": "string"
+     },
+     "public_info": {
+      "type": "string"
+     },
+     "friends_info": {
+      "type": "string"
+     },
+     "private_info": {
+      "type": "string"
+     },
+     "music_prefs": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "has_password": {
+      "type": "boolean"
+     },
+     "social": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "description": "Own profile (all fields)"
+   },
+   "PublicProfile": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "integer"
+     },
+     "display_name": {
+      "type": "string"
+     },
+     "public_info": {
+      "type": "string"
+     },
+     "music_prefs": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "is_friend": {
+      "type": "boolean"
+     },
+     "friends_info": {
+      "type": "string",
+      "description": "only present when is_friend"
+     }
+    },
+    "description": "Profile of someone else: private info is never returned"
+   },
+   "UserRef": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "integer"
+     },
+     "display_name": {
+      "type": "string"
+     }
+    }
+   },
+   "Friends": {
+    "type": "object",
+    "properties": {
+     "friends": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/UserRef"
+      }
+     },
+     "incoming": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "integer"
+        },
+        "user_id": {
+         "type": "integer"
+        },
+        "display_name": {
+         "type": "string"
+        }
+       }
+      }
+     },
+     "outgoing": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "integer"
+        },
+        "user_id": {
+         "type": "integer"
+        },
+        "display_name": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   },
+   "EventSummary": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "visibility": {
+      "type": "string",
+      "enum": [
+       "public",
+       "private"
+      ]
+     },
+     "license": {
+      "type": "string",
+      "enum": [
+       "open",
+       "invited",
+       "geo_time"
+      ]
+     },
+     "owner_id": {
+      "type": "integer"
+     },
+     "owner_name": {
+      "type": "string"
+     },
+     "start_at": {
+      "type": "integer"
+     },
+     "end_at": {
+      "type": "integer"
+     },
+     "lat": {
+      "type": "number"
+     },
+     "lng": {
+      "type": "number"
+     },
+     "radius_m": {
+      "type": "number"
+     },
+     "queue_count": {
+      "type": "integer"
+     },
+     "votes_count": {
+      "type": "integer"
+     },
+     "now_playing": {
+      "type": "string"
+     },
+     "covers": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Track"
+      }
+     }
+    }
+   },
+   "QueueItem": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "integer",
+      "description": "entry id: use it in /events/{id}/tracks/{trackId}/vote"
+     },
+     "status": {
+      "type": "string",
+      "enum": [
+       "queued",
+       "playing"
+      ]
+     },
+     "track_id": {
+      "type": "string"
+     },
+     "title": {
+      "type": "string"
+     },
+     "artist": {
+      "type": "string"
+     },
+     "cover": {
+      "type": "string"
+     },
+     "preview_url": {
+      "type": "string"
+     },
+     "votes": {
+      "type": "integer"
+     },
+     "voted": {
+      "type": "boolean",
+      "description": "did the caller vote for it"
+     }
+    }
+   },
+   "EventState": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "visibility": {
+      "type": "string"
+     },
+     "license": {
+      "type": "string"
+     },
+     "owner_id": {
+      "type": "integer"
+     },
+     "nowPlaying": {
+      "$ref": "#/components/schemas/QueueItem"
+     },
+     "queue": {
+      "type": "array",
+      "description": "sorted: most votes first; equal scores: the track that reached the score first",
+      "items": {
+       "$ref": "#/components/schemas/QueueItem"
+      }
+     },
+     "can_vote": {
+      "type": "object",
+      "properties": {
+       "ok": {
+        "type": "boolean"
+       },
+       "code": {
+        "type": "string"
+       },
+       "reason": {
+        "type": "string"
+       }
+      }
+     },
+     "invited": {
+      "type": "array",
+      "description": "owner only",
+      "items": {
+       "$ref": "#/components/schemas/UserRef"
+      }
+     },
+     "entry_id": {
+      "type": "integer",
+      "description": "POST /events/{id}/tracks only"
+     }
+    }
+   },
+   "PlaylistSummary": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "visibility": {
+      "type": "string"
+     },
+     "edit_license": {
+      "type": "string",
+      "enum": [
+       "open",
+       "invited"
+      ]
+     },
+     "owner_id": {
+      "type": "integer"
+     },
+     "owner_name": {
+      "type": "string"
+     },
+     "version": {
+      "type": "integer",
+      "description": "edit counter, +1 per change (optimistic locking with expectedVersion)"
+     },
+     "track_count": {
+      "type": "integer"
+     },
+     "collaborators": {
+      "type": "integer"
+     },
+     "covers": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Track"
+      }
+     }
+    }
+   },
+   "PlaylistState": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "visibility": {
+      "type": "string"
+     },
+     "edit_license": {
+      "type": "string"
+     },
+     "owner_id": {
+      "type": "integer"
+     },
+     "version": {
+      "type": "integer"
+     },
+     "can_edit": {
+      "type": "boolean"
+     },
+     "tracks": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "integer",
+         "description": "entry id (use for move/remove)"
+        },
+        "position": {
+         "type": "integer"
+        },
+        "track_id": {
+         "type": "string"
+        },
+        "title": {
+         "type": "string"
+        },
+        "artist": {
+         "type": "string"
+        },
+        "cover": {
+         "type": "string"
+        },
+        "preview_url": {
+         "type": "string"
+        },
+        "added_by": {
+         "type": "integer"
+        }
+       }
+      }
+     },
+     "invited": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/UserRef"
+      }
+     }
+    }
+   },
+   "Devices": {
+    "type": "object",
+    "properties": {
+     "mine": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "integer"
+        },
+        "name": {
+         "type": "string"
+        },
+        "platform": {
+         "type": "string"
+        },
+        "model": {
+         "type": "string"
+        },
+        "app_version": {
+         "type": "string"
+        },
+        "player": {
+         "type": "object",
+         "properties": {
+          "playing": {
+           "type": "boolean"
+          },
+          "volume": {
+           "type": "integer"
+          },
+          "track": {
+           "type": "object",
+           "properties": {
+            "title": {
+             "type": "string"
+            },
+            "artist": {
+             "type": "string"
+            }
+           }
+          }
+         }
+        },
+        "delegates": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/UserRef"
+         }
+        }
+       }
+      }
+     },
+     "delegated_to_me": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "integer"
+        },
+        "name": {
+         "type": "string"
+        },
+        "owner_id": {
+         "type": "integer"
+        },
+        "owner_name": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   },
+   "DeviceState": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "owner_id": {
+      "type": "integer"
+     },
+     "playing": {
+      "type": "boolean"
+     },
+     "volume": {
+      "type": "integer"
+     },
+     "index": {
+      "type": "integer"
+     },
+     "positionMs": {
+      "type": "integer"
+     },
+     "playlistId": {
+      "type": "integer"
+     },
+     "queue": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Track"
+      }
+     },
+     "updatedBy": {
+      "type": "integer"
+     },
+     "updatedAt": {
+      "type": "integer"
+     }
+    }
+   },
+   "Session": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "integer"
+     },
+     "created_at": {
+      "type": "integer"
+     },
+     "expires_at": {
+      "type": "integer"
+     },
+     "ip": {
+      "type": "string"
+     },
+     "platform": {
+      "type": "string"
+     },
+     "device": {
+      "type": "string"
+     },
+     "current": {
+      "type": "boolean"
+     }
+    }
+   },
+   "Ok": {
+    "type": "object",
+    "properties": {
+     "ok": {
+      "type": "boolean"
+     }
+    }
+   }
   }
  },
  "paths": {
@@ -50,10 +666,54 @@
     },
     "responses": {
      "201": {
-      "description": "Created"
+      "description": "Created",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Message"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -80,7 +740,14 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -112,10 +779,54 @@
     },
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Message"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -151,10 +862,54 @@
     },
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TokenResponse"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -194,10 +949,54 @@
     },
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TokenResponse"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -229,10 +1028,54 @@
     },
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Message"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -271,7 +1114,44 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -292,10 +1172,54 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -313,13 +1237,64 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Profile"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    },
@@ -366,13 +1341,64 @@
     },
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Profile"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -415,10 +1441,54 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -464,13 +1534,64 @@
     },
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Profile"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    },
@@ -499,10 +1620,54 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -520,13 +1685,95 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/Session"
+         }
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "tags": [
+     "Profile"
+    ],
+    "summary": "Disconnect all my other sessions (keeps the current one)",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "revoked": {
+           "type": "integer"
+          }
+         }
+        }
+       }
+      }
      }
     }
    }
@@ -557,10 +1804,54 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -588,13 +1879,67 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/UserRef"
+         }
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -622,13 +1967,64 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PublicProfile"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -646,13 +2042,64 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Friends"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -691,10 +2138,54 @@
       "description": "Created"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -725,10 +2216,54 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -759,10 +2294,54 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -790,13 +2369,67 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/Track"
+         }
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -814,13 +2447,67 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/EventSummary"
+         }
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     },
     "parameters": [
@@ -898,13 +2585,64 @@
     },
     "responses": {
      "201": {
-      "description": "Created"
+      "description": "Created",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/EventState"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -946,13 +2684,64 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/EventState"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    },
@@ -990,13 +2779,64 @@
     },
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/EventState"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    },
@@ -1025,10 +2865,54 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -1067,10 +2951,54 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    },
@@ -1107,10 +3035,54 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -1167,16 +3139,64 @@
     },
     "responses": {
      "201": {
-      "description": "Created"
+      "description": "Created",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/EventState"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "403": {
-      "description": "Licence refuses (NOT_INVITED, TOO_FAR, TOO_EARLY, TOO_LATE)"
+      "description": "Licence refuses (NOT_INVITED, TOO_FAR, TOO_EARLY, TOO_LATE)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -1212,13 +3232,64 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/EventState"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    },
@@ -1252,13 +3323,64 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/EventState"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -1286,13 +3408,64 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/EventState"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -1310,13 +3483,67 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/PlaylistSummary"
+         }
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     },
     "parameters": [
@@ -1374,13 +3601,64 @@
     },
     "responses": {
      "201": {
-      "description": "Created"
+      "description": "Created",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlaylistState"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -1408,13 +3686,64 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlaylistState"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    },
@@ -1452,13 +3781,64 @@
     },
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlaylistState"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    },
@@ -1487,10 +3867,54 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -1529,10 +3953,54 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    },
@@ -1569,10 +4037,54 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -1621,13 +4133,64 @@
     },
     "responses": {
      "201": {
-      "description": "Created"
+      "description": "Created",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlaylistState"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -1663,13 +4226,64 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlaylistState"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -1726,13 +4340,64 @@
     },
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlaylistState"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -1750,13 +4415,64 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Devices"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    },
@@ -1802,10 +4518,54 @@
       "description": "Created"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -1836,10 +4596,54 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -1878,10 +4682,54 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    },
@@ -1918,10 +4766,54 @@
       "description": "OK"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -1949,13 +4841,64 @@
     ],
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeviceState"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -2016,13 +4959,64 @@
     },
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeviceState"
+        }
+       }
+      }
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -2061,10 +5055,54 @@
       "description": "Created"
      },
      "400": {
-      "description": "Validation error"
+      "description": "Validation error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      },
      "401": {
-      "description": "Unauthenticated"
+      "description": "Unauthenticated",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -2078,6 +5116,36 @@
     "responses": {
      "200": {
       "description": "OK"
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
@@ -2101,6 +5169,36 @@
     "responses": {
      "200": {
       "description": "audio/wav"
+     },
+     "403": {
+      "description": "Forbidden (licence, ownership\u2026)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found (also returned for private resources the caller cannot see)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
      }
     }
    }
