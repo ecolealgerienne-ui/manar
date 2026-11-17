@@ -12,16 +12,18 @@ music-room/
 ```
 
 ## Quick start
-```bash
-make start            # installs deps, creates .env from .env.example, API on http://localhost:4000
-# Swagger / API reference: http://localhost:4000/docs   (raw: /docs.json)
-make test             # 26 unit + integration tests
-make bench            # load test (results in docs/PERFORMANCE.md)
-make mobile           # Expo dev server: press a (Android), i (iOS), w (web)  — or scan the QR with Expo Go
+**Windows / PowerShell (no `make` needed)** — Node ≥ 22.13:
+```powershell
+cd music-room
+npm run setup      # installs backend + mobile dependencies
+npm start          # API on http://localhost:4000  (Swagger: /docs)
+npm test           # 27 tests
+npm run mobile     # 2nd terminal: Expo dev server, press w (web) / scan QR with Expo Go
 ```
-Requirements: Node ≥ 22.13, `make`. Dependencies are never committed: they are downloaded from `package.json` / lockfiles by `make install`.
-Without SMTP settings, e-mails (verification link, reset code) are printed in the server console; set `SMTP_*` in `.env` for real delivery.
-On a phone, set the back-end address (your computer's LAN IP, e.g. `http://192.168.1.10:4000`) on the login screen or in *Profile → Back-end address*.
+Linux/macOS: `make start`, `make test`, `make bench`, `make mobile` do the same.
+
+**Dev mode** (no SMTP and not production): there is no mail server, so the API returns the verification token / reset code in its response and the app shows a *Verify my e-mail* button. Social login shows **demo buttons** (token `dev:<name>`) until real Google/Facebook IDs are configured; these two shortcuts are disabled in production or as soon as SMTP / provider credentials are set.
+On a phone, set the server address (your PC's LAN IP, e.g. `http://192.168.1.10:4000`, never `localhost`) at the bottom of the login screen.
 
 ## Subject coverage
 | Subject | Where |
@@ -62,7 +64,7 @@ See `.env.example` (backend) and `mobile/.env.example`. **Never commit a `.env`*
 ## Social login setup
 1. Google: create OAuth client IDs (web/android/iOS) on console.cloud.google.com → put them in `GOOGLE_CLIENT_IDS` (backend, comma separated) and `EXPO_PUBLIC_GOOGLE_*_CLIENT_ID` (mobile).
 2. Facebook: create an app on developers.facebook.com → `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET` (backend only) and `EXPO_PUBLIC_FACEBOOK_APP_ID` (mobile).
-The backend verifies every token with the provider (`backend/src/social.js`); tests stub that call. The social buttons stay disabled until the IDs are configured. These flows require real provider credentials and a device/emulator, so they were **not exercised end-to-end** in the automated tests.
+The backend verifies every token with the provider (`backend/src/social.js`); tests stub that call. Without IDs the app offers demo social buttons (dev only). These flows require real provider credentials and a device/emulator, so they were **not exercised end-to-end** in the automated tests.
 
 ## Status / honesty notes
 * Backend: 26 automated tests pass; REST flows, WebSocket and the mobile web build were smoke-tested together (register → mail → log in → create event → suggest track).

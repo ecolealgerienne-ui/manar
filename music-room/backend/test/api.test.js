@@ -223,3 +223,16 @@ test('WebSocket: authenticated, authorised, live updates for vote + playlist + d
   const bad = await open('nope'); await wait(() => bad.ws.readyState === 2 || bad.ws.readyState === 3);
   A.ws.close(); B.ws.close();
 });
+
+test('dev mode: token handed back, demo social login works only without credentials', async () => {
+  const r = await c('POST', '/auth/register', { body: { email: 'devmode@test.io', password: 'Passw0rd!x', display_name: 'Dev' } });
+  assert.ok(r.body.dev_verify_token, 'dev token returned when no SMTP is configured');
+  assert.equal((await fetch(`${app.base}/auth/verify-email?token=${r.body.dev_verify_token}`)).status, 200);
+  assert.equal((await c('POST', '/auth/login', { body: { email: 'devmode@test.io', password: 'Passw0rd!x' } })).status, 200);
+  const g = await c('POST', '/auth/social', { body: { provider: 'google', token: 'dev:alice' } });
+  assert.equal(g.status, 200);
+  assert.equal((await c('GET', '/me', { token: g.body.token })).body.display_name, 'alice');
+  assert.equal((await c('GET', '/config')).body.dev_mode, true);
+  const dup = await c('POST', '/auth/register', { body: { email: 'devmode@test.io', password: 'Passw0rd!x', display_name: 'Dev' } });
+  assert.equal(dup.body.dev_verify_token, undefined, 'existing e-mail never gets a token');
+});

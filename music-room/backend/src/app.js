@@ -73,6 +73,9 @@ export function createApp(db, { catalog = createCatalog(db), publish = () => {},
   const meta = (req) => ({ ip: req.ip, ua: req.headers['user-agent'], platform: req.headers['x-platform'], device: req.headers['x-device-model'] });
   const pos = (req) => (req.body?.position ?? (req.query.lat ? { lat: Number(req.query.lat), lng: Number(req.query.lng) } : undefined));
 
+  app.get('/config', (req, res) => res.json({ dev_mode: config.devMode,
+    social: { google: config.googleClientIds.length > 0, facebook: !!(config.facebookAppId && config.facebookAppSecret) },
+    social_demo: !config.isProd }));
   app.get('/health', (req, res) => res.json({ ok: true }));
   app.get('/docs.json', (req, res) => res.json(openapi));
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapi));

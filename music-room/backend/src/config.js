@@ -32,6 +32,9 @@ export const config = {
   logDir: env.LOG_DIR || path.join(root, 'logs'),
   sessionDays: 7,
 };
+// Dev mode = not production AND no SMTP: the API hands the verification token / reset code back in the response
+// so the app can be tried without a mail server. Never active in production.
+config.devMode = !config.isProd && !config.smtp.host;
 
 if (config.isProd && config.tokenSecret.startsWith('dev-only')) {
   throw new Error('TOKEN_SECRET must be set in production');

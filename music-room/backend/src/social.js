@@ -8,6 +8,14 @@ import { HttpError } from './util.js';
  */
 export const social = {
   async verify(provider, token) {
+    // Demo login for development ONLY: when the provider has no credentials configured and we are not in
+    // production, the token "dev:<name>" logs in as a fake <name> account. Disabled as soon as real IDs are set.
+    const configured = provider === 'google' ? config.googleClientIds.length > 0 : !!(config.facebookAppId && config.facebookAppSecret);
+    if (!config.isProd && !configured && typeof token === 'string' && token.startsWith('dev:')) {
+      const name = token.slice(4).replace(/[^a-zA-Z0-9_.-]/g, '').slice(0, 30);
+      if (!name) throw new HttpError(400, 'BAD_REQUEST', 'Enter a name');
+      return { id: `dev-${provider}-${name.toLowerCase()}`, email: `${name.toLowerCase()}@${provider}.dev`, emailVerified: true, name };
+    }
     if (provider === 'google') return this.google(token);
     if (provider === 'facebook') return this.facebook(token);
     throw new HttpError(400, 'BAD_PROVIDER', 'provider must be google or facebook');

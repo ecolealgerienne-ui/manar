@@ -3,10 +3,10 @@ import { ScrollView, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { api, setBaseUrl, state, logAction } from '../api';
 import { useAuth } from '../auth';
-import { Btn, Input, s, guard, Loading, notify, ThemePicker } from '../ui';
+import { Btn, Input, s, guard, Loading, notify } from '../ui';
 import { useSocialLogin, socialConfigured } from '../social';
 
-export default function ProfileScreen({ onTheme }) {
+export default function ProfileScreen() {
   const { user, refresh, signOut } = useAuth();
   const [f, setF] = useState(null), [fr, setFr] = useState(null), [q, setQ] = useState(''), [found, setFound] = useState([]);
   const [pw, setPw] = useState({ current: '', next: '' }), [server, setServer] = useState(state.baseUrl);
@@ -52,7 +52,6 @@ export default function ProfileScreen({ onTheme }) {
         <Input placeholder="New password" secureTextEntry value={pw.next} onChangeText={(next) => setPw({ ...pw, next })} />
         <Btn alt title="Change password" onPress={changePw} /></>}
 
-      <Text style={s.h2}>Style</Text><ThemePicker onChange={onTheme} />
       <Text style={s.h2}>Back-end address</Text><Input value={server} onChangeText={setServer} keyboardType="url" />
       <Btn alt title="Save address" onPress={saveServer} />
       <Btn alt title="Log out" onPress={signOut} />

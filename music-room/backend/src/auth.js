@@ -44,6 +44,7 @@ export function createAuth(db) {
     const t = await issueToken(user.id, 'verify', DAY);
     await sendMail(user.email, 'Verify your Music Room account',
       `Hello ${user.display_name},\n\nConfirm your e-mail address:\n${config.publicUrl}/auth/verify-email?token=${t}\n\nThis link is valid for 24 hours.`);
+    return t;
   }
 
   async function register({ email, password, display_name }) {
@@ -51,21 +52,22 @@ export function createAuth(db) {
     checkPassword(password);
     const name = str(display_name, 'display_name', { min: 2, max: 50 });
     const hash = await hashPassword(password);
+    let devToken;
     try {
       const r = run('INSERT INTO users (email,password_hash,display_name,created_at) VALUES (?,?,?,?)', email.trim().toLowerCase(), hash, name, now());
       const user = q('SELECT * FROM users WHERE id=?', Number(r.lastInsertRowid));
-      await sendVerification(user);
+      devToken = await sendVerification(user);
     } catch (e) {
       // Same answer whether or not the e-mail exists: no account enumeration.
       if (!String(e.message).includes('UNIQUE')) throw e;
     }
-    return { message: 'If the address is valid, a verification e-mail has been sent.' };
+    return { message: 'If the address is valid, a verification e-mail has been sent.', ...(config.devMode && devToken ? { dev_verify_token: devToken } : {}) };
   }
 
   async function resendVerification(email) {
-    const u = typeof email === 'string' ? q('SELECT * FROM users WHERE email=? AND email_verified=0 AND password_hash IS NOT NULL', email.trim()) : null;
-    if (u) await sendVerification(u);
-    return { message: 'If the account exists and is not verified, an e-mail has been sent.' };
+    const u = typeof email === 'string' ? q('SELECT * FROM users WHERE email=? AND email_verified=0 AND password_hash IS NOT NULL', email.trim().toLowerCase()) : null;
+    const tok = u ? await sendVerification(u) : null;
+    return { message: 'If the account exists and is not verified, an e-mail has been sent.', ...(config.devMode && tok ? { dev_verify_token: tok } : {}) };
   }
 
   function verifyEmail(token) { run('UPDATE users SET email_verified=1 WHERE id=?', consumeToken(token, 'verify')); }
@@ -83,12 +85,14 @@ export function createAuth(db) {
   }
 
   async function forgotPassword(email) {
-    const u = typeof email === 'string' ? q('SELECT * FROM users WHERE email=? AND password_hash IS NOT NULL', email.trim()) : null;
+    const u = typeof email === 'string' ? q('SELECT * FROM users WHERE email=? AND password_hash IS NOT NULL', email.trim().toLowerCase()) : null;
+    let devCode;
     if (u) {
       const code = await issueToken(u.id, 'reset', 30 * 60000, true);
+      devCode = code;
       await sendMail(u.email, 'Reset your Music Room password', `Your reset code is: ${code}\nIt is valid for 30 minutes. If you did not ask for it, ignore this e-mail.`);
     }
-    return { message: 'If the account exists, a reset code has been sent.' };
+    return { message: 'If the account exists, a reset code has been sent.', ...(config.devMode && devCode ? { dev_reset_code: devCode } : {}) };
   }
   async function resetPassword(code, password) {
     checkPassword(password);

@@ -1,0 +1,12 @@
+{
+  "name": "music-room",
+  "private": true,
+  "description": "Windows-friendly shortcuts (no make needed): npm run setup / start / test / mobile",
+  "scripts": {
+    "setup": "npm --prefix backend install && npm --prefix mobile install",
+    "start": "npm --prefix backend start",
+    "test": "npm --prefix backend test",
+    "bench": "npm --prefix backend run bench",
+    "mobile": "npm --prefix mobile start"
+  }
+}
