@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { api, setBaseUrl, state } from '../api';
 import { useAuth } from '../auth';
-import { Btn, Input, s, guard, notify, colors } from '../ui';
+import { Btn, Input, s, guard, notify, Banner, ThemePicker } from '../ui';
 import { useSocialLogin, socialConfigured } from '../social';
 
-export default function AuthScreen() {
+export default function AuthScreen({ onTheme }) {
   const { signIn } = useAuth();
   const [mode, setMode] = useState('login'); // login | register | forgot | reset
   const [f, setF] = useState({ email: '', password: '', name: '', code: '' });
@@ -33,7 +33,7 @@ export default function AuthScreen() {
   const title = { login: 'Log in', register: 'Create account', forgot: 'Forgot password', reset: 'Choose a new password' }[mode];
   return (
     <ScrollView style={s.screen} contentContainerStyle={{ paddingTop: 40 }} keyboardShouldPersistTaps="handled">
-      <Text style={[s.h1, { fontSize: 30 }]}>🎵 Music Room</Text>
+      <Banner />
       <Text style={s.h2}>{title}</Text>
       {mode === 'register' && <Input placeholder="Display name" value={f.name} onChangeText={set('name')} autoCapitalize="words" />}
       {mode !== 'reset' && <Input placeholder="E-mail" value={f.email} onChangeText={set('email')} keyboardType="email-address" />}
@@ -49,7 +49,9 @@ export default function AuthScreen() {
         {mode !== 'login' && <Btn alt small title="← Back to log in" onPress={() => setMode('login')} />}
         {mode === 'login' && <><Btn alt small title="Create an account" onPress={() => setMode('register')} /><View style={{ height: 8 }} /><Btn alt small title="Forgot password?" onPress={() => setMode('forgot')} /></>}
       </View>
-      <Text style={[s.h2, { marginTop: 24 }]}>Back-end address</Text>
+      <Text style={[s.h2, { marginTop: 24 }]}>Style</Text>
+      <ThemePicker onChange={onTheme} />
+      <Text style={s.h2}>Back-end address</Text>
       <Input value={server} onChangeText={setServer} placeholder="http://192.168.x.x:4000" keyboardType="url" />
       <Text style={s.dim}>The app is only a remote control: set your server URL here (test / production).</Text>
     </ScrollView>

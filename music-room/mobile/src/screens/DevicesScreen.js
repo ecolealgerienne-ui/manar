@@ -3,7 +3,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Device from 'expo-device';
 import { api, subscribe, logAction } from '../api';
-import { Btn, Input, s, guard, Loading, notify } from '../ui';
+import { Btn, Input, s, guard, Loading, notify, colors } from '../ui';
 
 export function DevicesList({ navigation }) {
   const [d, setD] = useState(null), [friends, setFriends] = useState([]), [name, setName] = useState(Device.deviceName || '');
@@ -52,7 +52,7 @@ export function Remote({ route }) {
       <Text style={s.h2}>Load a playlist</Text>
       {pls.map((p) => <View key={p.id} style={[s.card, s.row]}><Text style={s.text}>{p.name}</Text><Btn small title="Load" onPress={() => cmd('load', { playlistId: p.id })} /></View>)}
       <Text style={s.h2}>Queue</Text>
-      {(st.queue || []).map((t, i) => <Text key={t.id + i} style={[s.text, i === st.index && { color: '#8b5cf6' }]}>{i + 1}. {t.title}</Text>)}
+      {(st.queue || []).map((t, i) => <Text key={t.id + i} style={[s.text, i === st.index && { color: colors.accent, fontWeight: '800' }]}>{i + 1}. {t.title}</Text>)}
     </ScrollView>
   );
 }
