@@ -38,7 +38,7 @@ export function ProfileScreen({ navigation }) {
   const real = cfg?.social || {};
   return (
     <Page onRefresh={loadAll}>
-      <LinearGradient colors={['#312e81', '#7c3aed', '#ec4899']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 20 }}>
+      <LinearGradient colors={['#450a0a', '#b91c1c', '#fb7185']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 20 }}>
         <View style={[s.row, { flexWrap: 'wrap' }]}>
           <Avatar name={user.display_name} size={76} />
           <View style={{ marginLeft: 16, flex: 1, minWidth: 200 }}>
@@ -119,7 +119,7 @@ export function Person({ route }) {
   if (!u) return <Loading />;
   return (
     <Page>
-      <LinearGradient colors={['#0ea5e9', '#8b5cf6', '#ec4899']} style={{ borderRadius: 24, padding: 22, alignItems: 'center' }}>
+      <LinearGradient colors={['#7f1d1d', '#dc2626', '#fb7185']} style={{ borderRadius: 24, padding: 22, alignItems: 'center' }}>
         <Avatar name={u.display_name} size={90} /><Text style={{ color: '#fff', fontSize: 28, fontWeight: '900', marginTop: 10 }}>{u.display_name}</Text>
         <View style={[s.row, { marginTop: 6 }]}><Badge icon={u.is_friend ? 'people' : 'earth'} text={u.is_friend ? 'Friend' : 'Public profile'} /></View>
       </LinearGradient>

@@ -54,7 +54,7 @@ export default function AuthScreen() {
   return (
     <Page>
       <View style={{ flexDirection: wide ? 'row' : 'column', gap: 16, marginTop: wide ? 30 : 0 }}>
-        <LinearGradient colors={['#4c1d95', '#be185d', '#ea580c']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1, borderRadius: 28, padding: wide ? 24 : 16, justifyContent: 'center' }}>
+        <LinearGradient colors={['#450a0a', '#b91c1c', '#fb7185']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1, borderRadius: 28, padding: wide ? 24 : 16, justifyContent: 'center' }}>
           <View style={s.row}><Ionicons name="musical-notes" size={40} color="#fff" /><Text style={{ color: '#fff', fontSize: 38, fontWeight: '900', marginLeft: 10 }}>Music Room</Text></View>
           <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 16, marginTop: 6 }}>Music, collaboration and mobility.</Text>
           {wide && <>

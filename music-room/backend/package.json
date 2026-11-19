@@ -3,12 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22.13" },
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
     "start": "node --disable-warning=ExperimentalWarning src/index.js",
     "dev": "node --disable-warning=ExperimentalWarning --watch src/index.js",
     "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js",
-    "bench": "node bench.js"
+    "bench": "node bench.js",
+    "logs": "node --disable-warning=ExperimentalWarning src/tools/logs.js"
   },
   "dependencies": {
     "express": "^4.21.2",

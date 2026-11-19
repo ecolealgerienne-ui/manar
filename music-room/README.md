@@ -55,6 +55,10 @@ On a phone, set the server address (your PC's LAN IP, e.g. `http://192.168.1.10:
 
 No bonus is claimed (the subject evaluates bonuses only if the mandatory part is perfect).
 
+## More documentation
+* `docs/PHONE.md` — test on a phone / emulator · `docs/SOCIAL-LOGIN.md` — Google/Facebook: principle + setup · `docs/SECURITY-EXPLAINED.md` and `docs/SECURITY.md` — securing and logs · `docs/PERFORMANCE.md` — ramp-up · `docs/BONUS.md` — what the bonus part asks · `docs/AI-USAGE.md`
+* Show the back-end logs: `npm run logs`
+
 ## Technical choices (and why)
 | Choice | Justification | Trade-off |
 |---|---|---|

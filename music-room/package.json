@@ -7,6 +7,7 @@
     "start": "npm --prefix backend start",
     "test": "npm --prefix backend test",
     "bench": "npm --prefix backend run bench",
-    "mobile": "npm --prefix mobile start"
+    "mobile": "npm --prefix mobile start",
+    "logs": "npm --prefix backend run logs --"
   }
 }

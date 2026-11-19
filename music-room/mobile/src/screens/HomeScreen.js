@@ -24,7 +24,7 @@ export default function HomeScreen({ navigation }) {
   const hour = new Date().getHours();
   return (
     <Page onRefresh={load} refreshing={busy}>
-      <LinearGradient colors={['#4c1d95', '#be185d', '#ea580c']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 20 }}>
+      <LinearGradient colors={['#450a0a', '#b91c1c', '#fb7185']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 20 }}>
         <View style={[s.row, { flexWrap: 'wrap' }]}>
           <Avatar name={user.display_name} size={64} />
           <View style={{ marginLeft: 14, flex: 1, minWidth: 200 }}>
@@ -32,15 +32,15 @@ export default function HomeScreen({ navigation }) {
             <Text style={{ color: '#fff', fontSize: 30, fontWeight: '900' }}>{user.display_name}</Text>
             <Text style={{ color: 'rgba(255,255,255,0.85)' }}>{live.length ? `${live.length} live event${live.length > 1 ? 's' : ''} right now` : 'Start a party, vote for the next track'}</Text>
           </View>
-          <View style={{ minWidth: 180, marginTop: 10 }}><Btn color="#111827" icon="add-circle" title="New live event" onPress={go('EventsTab')} /></View>
+          <View style={{ minWidth: 180, marginTop: 10 }}><Btn color="#1f0c12" icon="add-circle" title="New live event" onPress={go('EventsTab')} /></View>
         </View>
       </LinearGradient>
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 }}>
-        <Stat icon="radio" value={d.events.length} label="Live events" colors={['#7c3aed', '#ec4899']} onPress={go('EventsTab')} />
-        <Stat icon="list" value={d.playlists.length} label="Playlists" colors={['#2563eb', '#22d3ee']} onPress={go('PlaylistsTab')} />
-        <Stat icon="phone-portrait" value={d.devices.mine.length + d.devices.delegated_to_me.length} label="Devices" colors={['#f97316', '#ef4444']} onPress={go('DevicesTab')} />
-        <Stat icon="people" value={d.friends.friends.length} label={d.friends.incoming.length ? `Friends (+${d.friends.incoming.length} request)` : 'Friends'} colors={['#059669', '#3b82f6']} onPress={go('ProfileTab')} />
+        <Stat icon="radio" value={d.events.length} label="Live events" colors={['#991b1b', '#f43f5e']} onPress={go('EventsTab')} />
+        <Stat icon="list" value={d.playlists.length} label="Playlists" colors={['#b91c1c', '#fb7185']} onPress={go('PlaylistsTab')} />
+        <Stat icon="phone-portrait" value={d.devices.mine.length + d.devices.delegated_to_me.length} label="Devices" colors={['#c2410c', '#f87171']} onPress={go('DevicesTab')} />
+        <Stat icon="people" value={d.friends.friends.length} label={d.friends.incoming.length ? `Friends (+${d.friends.incoming.length} request)` : 'Friends'} colors={['#7f1d1d', '#ef4444']} onPress={go('ProfileTab')} />
       </View>
 
       {players.length > 0 && (

@@ -5,9 +5,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { state as apiState } from './api';
 
 /* ---------- design tokens: dark, saturated, lots of gradients ---------- */
-export const colors = { bg: '#0b0b1a', surface: '#16162b', surface2: '#202042', border: '#2e2e55', text: '#ffffff', dim: '#a3a5d6',
-  accent: '#8b5cf6', pink: '#ec4899', cyan: '#22d3ee', green: '#34d399', orange: '#fb923c', red: '#f87171', yellow: '#fde047' };
-export const GRADS = [['#7c3aed', '#ec4899'], ['#2563eb', '#22d3ee'], ['#f97316', '#ef4444'], ['#059669', '#3b82f6'], ['#a855f7', '#6366f1'], ['#f59e0b', '#ec4899'], ['#0ea5e9', '#8b5cf6'], ['#e11d48', '#f97316']];
+export const colors = { bg: '#12060a', surface: '#1f0c12', surface2: '#2e121b', border: '#4d1c28', text: '#ffffff', dim: '#e0a8b3',
+  accent: '#e11d48', pink: '#fb7185', cyan: '#fda4af', green: '#34d399', orange: '#fb923c', red: '#f87171', yellow: '#fde047' };
+export const GRADS = [['#7f1d1d', '#ef4444'], ['#9f1239', '#fb7185'], ['#b91c1c', '#f97316'], ['#be123c', '#f43f5e'], ['#991b1b', '#e11d48'], ['#c2410c', '#ef4444'], ['#881337', '#e11d48'], ['#dc2626', '#fb923c']];
+export const RED = ['#7f1d1d', '#dc2626', '#fb7185'];
 export const grad = (seed) => { const s = String(seed); let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return GRADS[h % GRADS.length]; };
 export const fullUrl = (u) => (!u ? u : /^https?:/.test(u) ? u : apiState.baseUrl + u);
 
@@ -20,7 +21,7 @@ export const s = StyleSheet.create({
   text: { color: colors.text, fontSize: 15 }, dim: { color: colors.dim, fontSize: 12 },
   input: { backgroundColor: colors.surface2, color: colors.text, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, marginBottom: 10, borderWidth: 1, borderColor: colors.border },
   row: { flexDirection: 'row', alignItems: 'center' }, between: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  note: { backgroundColor: '#3b2f05', borderRadius: 14, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: '#a16207' },
+  note: { backgroundColor: '#3d1a05', borderRadius: 14, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: '#a16207' },
 });
 
 /** Centered max-width page that fills wide screens with a responsive grid (see Grid). */
@@ -54,7 +55,7 @@ export const Btn = ({ title, onPress, alt, small, disabled, icon, color, style }
         {icon && <Ionicons name={icon} size={small ? 15 : 18} color={color || colors.text} style={title ? { marginRight: 6 } : null} />}
         {!!title && <Text style={{ color: color || colors.text, fontWeight: '700', fontSize: small ? 13 : 15 }}>{title}</Text>}
       </View>) : (
-      <LinearGradient colors={color ? [color, color] : ['#7c3aed', '#ec4899']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[s.row, { justifyContent: 'center', paddingVertical: small ? 7 : 12, paddingHorizontal: small ? 12 : 16 }]}>
+      <LinearGradient colors={color ? [color, color] : ['#b91c1c', '#f43f5e']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[s.row, { justifyContent: 'center', paddingVertical: small ? 7 : 12, paddingHorizontal: small ? 12 : 16 }]}>
         {icon && <Ionicons name={icon} size={small ? 15 : 18} color="#fff" style={title ? { marginRight: 6 } : null} />}
         {!!title && <Text style={{ color: '#fff', fontWeight: '800', fontSize: small ? 13 : 15 }}>{title}</Text>}
       </LinearGradient>)}
@@ -92,7 +93,7 @@ export function DialogHost() {
     <Modal transparent visible={!!dlg} animationType="fade" onRequestClose={() => close(false)}>
       <View style={{ flex: 1, backgroundColor: 'rgba(5,5,15,0.75)', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
         <View style={{ width: '100%', maxWidth: 420, backgroundColor: colors.surface, borderRadius: 22, padding: 22, borderWidth: 1, borderColor: colors.border }}>
-          <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: dlg?.danger ? 'rgba(248,113,113,0.18)' : 'rgba(139,92,246,0.2)', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+          <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: dlg?.danger ? 'rgba(248,113,113,0.18)' : 'rgba(225,29,72,0.22)', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
             <Ionicons name={dlg?.danger ? 'warning' : 'help-circle'} size={28} color={dlg?.danger ? colors.red : colors.accent} /></View>
           <Text style={[s.h2, { marginBottom: 6 }]}>{dlg?.title}</Text>
           {!!dlg?.message && <Text style={{ color: colors.dim, fontSize: 14, marginBottom: 18 }}>{dlg.message}</Text>}
